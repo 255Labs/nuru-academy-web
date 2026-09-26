@@ -1,0 +1,62 @@
+# ============================================================================
+# Nuru AI Academy — CI/CD Pipeline
+# Triggers on push to main:
+#   1. Runs DB migrations against Supabase
+#   2. Deploys app to Vercel
+# ============================================================================
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # --------------------------------------------------------------------------
+  # Job 1: Database migrations
+  # --------------------------------------------------------------------------
+  migrate:
+    name: Run DB Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+
+      - name: Run all migrations
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: bash supabase/run-all-migrations.sh
+
+  # --------------------------------------------------------------------------
+  # Job 2: Deploy to Vercel (runs after migrations succeed)
+  # --------------------------------------------------------------------------
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: migrate
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: --prod
+          working-directory: ./

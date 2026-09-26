@@ -1,0 +1,26 @@
+# ============================================================================
+# Run DB migrations only — useful when you change schema without touching app code
+# Trigger manually from GitHub Actions tab
+# ============================================================================
+name: Migrate DB Only
+
+on:
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    name: Run DB Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+
+      - name: Run all migrations
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: bash supabase/run-all-migrations.sh
