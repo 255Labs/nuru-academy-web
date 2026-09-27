@@ -28,8 +28,12 @@ export function HeroBanner() {
   const [mood, setMood]         = useState<NuruMood>("wave");
   const [moodIdx, setMoodIdx]   = useState(0);
   const [bobClass, setBobClass] = useState("nuru-float");
+  const [imgIdx, setImgIdx]     = useState(0);
 
-  useEffect(() => setHour(new Date().getHours()), []);
+  useEffect(() => {
+    setHour(new Date().getHours());
+    setImgIdx(new Date().getDay() % BANNER_IMAGES.length);
+  }, []);
 
   // Cycle Nuru's mood every 4s with a bounce on change
   useEffect(() => {
@@ -49,8 +53,6 @@ export function HeroBanner() {
     hour === null || hour < 12 ? t("hero.good_morning")
     : hour < 18 ? t("hero.good_afternoon")
     : t("hero.good_evening");
-
-  const imgIdx = new Date().getDay() % BANNER_IMAGES.length;
 
   const QUICK_ACTIONS = [
     { icon: BookOpen,    labelKey: "hero.quick.explain", href: "/study-room" },
