@@ -6,12 +6,15 @@ import type { JourneyNode } from "@/lib/types";
 
 function geometry(count: number) {
   const W = 560, TOP = 74, ROW = 104, AMP = 150, cx = W / 2;
-  const pts = Array.from({ length: count }, (_, i) => ({ x: cx + AMP * Math.sin(i * 1.05), y: TOP + i * ROW }));
   const height = TOP * 2 + (count - 1) * ROW;
+  // Build points top-to-bottom visually, then REVERSE so index 0 = bottom (Day 1 starts at bottom)
+  const rawPts = Array.from({ length: count }, (_, i) => ({ x: cx + AMP * Math.sin(i * 1.05), y: TOP + i * ROW }));
+  const pts = [...rawPts].reverse();
   const seg = (a: { x: number; y: number }, b: { x: number; y: number }) => {
     const my = (a.y + b.y) / 2;
     return ` C ${a.x} ${my}, ${b.x} ${my}, ${b.x} ${b.y}`;
   };
+  // Track path follows pts order (bottom to top visually)
   let track = pts.length ? `M ${pts[0].x} ${pts[0].y}` : "";
   for (let i = 1; i < pts.length; i++) track += seg(pts[i - 1], pts[i]);
   return { W, height, pts, track, seg, cx };
