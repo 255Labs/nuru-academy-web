@@ -4,13 +4,13 @@
 
 :root {
   color-scheme: light;
-  --c-bg: 252 249 244;
+  --c-bg: 244 246 252;
   --c-card: 255 255 255;
   --c-ink: 26 22 30;
   --c-ink2: 74 68 82;
   --c-muted: 138 130 142;
-  --c-line: 235 228 220;
-  --c-lav: 238 233 253;
+  --c-line: 220 224 238;
+  --c-lav: 232 225 255;
 }
 
 .dark {
@@ -42,10 +42,10 @@ html, body {
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(ellipse 60% 40% at 15% 10%, rgba(107,78,255,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 50% at 85% 15%, rgba(245,185,66,0.05) 0%, transparent 55%),
-    radial-gradient(ellipse 40% 60% at 80% 85%, rgba(107,78,255,0.04) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 35% at 10% 80%, rgba(34,197,94,0.03) 0%, transparent 55%);
+    radial-gradient(ellipse 60% 40% at 15% 10%, rgba(124,92,255,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 85% 15%, rgba(255,190,48,0.09) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 60% at 80% 85%, rgba(124,92,255,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 35% at 10% 80%, rgba(29,214,94,0.06) 0%, transparent 55%);
 }
 
 .dark .app-bg::before {
@@ -81,7 +81,7 @@ html, body {
 }
 
 :focus-visible {
-  outline: 2px solid #6B4EFF;
+  outline: 2px solid #7C5CFF;
   outline-offset: 2px;
 }
 
