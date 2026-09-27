@@ -15,10 +15,8 @@ const NAV = [
   { href: "/",             labelKey: "nav.home",         icon: Home },
   { href: "/courses",      labelKey: "nav.courses",       icon: BookOpen },
   { href: "/arena",        labelKey: "nav.arena",         icon: Swords },
-  // { href: "/mentors",   labelKey: "nav.mentor",        icon: Users },   // Coming soon
-  { href: "/compete",      labelKey: "nav.compete",       icon: Zap },
+  // { href: "/compete",   labelKey: "nav.compete",       icon: Zap },     // Competitions — coming soon
   { href: "/certificates", labelKey: "nav.certs",         icon: Award },
-  // { href: "/world",     labelKey: "nav.world",         icon: Map },     // Coming soon
   { href: "/achievements", labelKey: "nav.achievements",  icon: Trophy },
   { href: "/settings",     labelKey: "nav.settings",      icon: Settings },
 ];
