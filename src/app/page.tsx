@@ -31,8 +31,9 @@ export default async function RootPage() {
           <RecommendedForYou />
         </div>
 
-        {/* Right column — sticky, scrollable independently on tall screens */}
-        <aside className="hidden xl:flex flex-col gap-5 w-[316px] shrink-0 sticky top-6 max-h-[calc(100vh-4rem)] overflow-y-auto pb-8 pr-1" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(107,78,255,0.25) transparent" }}>
+        {/* Right column — sticky so it follows the page scroll, but no max-height
+            clipping: content grows naturally and the left column is always taller */}
+        <aside className="hidden xl:flex flex-col gap-5 w-[316px] shrink-0 sticky top-6 pb-8">
           <Leaderboard />
           <QuestList />
           <StreakCalendar />
