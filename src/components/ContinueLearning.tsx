@@ -26,20 +26,34 @@ export function ContinueLearning() {
   const purchasedTracks = useGameStore((s) => s.purchasedTracks);
   const setActiveTrack = useGameStore((s) => s.setActiveTrack);
 
+  // Guard: wait until tracks are fully loaded and valid before mapping.
+  // useTracks() can return an array with undefined elements or an empty
+  // array before the curriculum resolves — either crashes t.name / t.modules.
+  if (!TRACKS || TRACKS.length === 0 || TRACKS.some((tr) => !tr)) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-bold text-nuru-ink text-lg">{t("continue.title")}</h2>
+        </div>
+        <p className="text-sm text-nuru-muted">Loading…</p>
+      </div>
+    );
+  }
+
   // Only tracks that are genuinely accessible right now — earned via
   // Emberfall or paid for — not every track that merely exists in the
   // curriculum. With one real course today, this correctly shows just one
   // card instead of implying Intermediate/Expert are equally available.
-  const cards = TRACKS.filter((t) => isTrackUnlocked(t.id as TrackId, missionsPassed, purchasedTracks)).map((t) => {
-    const total = trackTotalNodes(t.id as TrackId);
-    const done = progress[t.id as TrackId];
+  const cards = TRACKS.filter((tr) => isTrackUnlocked(tr.id as TrackId, missionsPassed, purchasedTracks)).map((tr) => {
+    const total = trackTotalNodes(tr.id as TrackId);
+    const done = progress[tr.id as TrackId];
     const pct = Math.min(100, Math.round((done / total) * 100));
     const remaining = Math.max(1, total - done);
     const moduleIdx = Math.min(
-      t.modules.length - 1,
-      Math.floor(done / (t.modules[0].lessons.length + 1))
+      tr.modules.length - 1,
+      Math.floor(done / (tr.modules[0].lessons.length + 1))
     );
-    return { track: t, pct, moduleIdx, minLeft: remaining * 4 };
+    return { track: tr, pct, moduleIdx, minLeft: remaining * 4 };
   });
 
   return (
