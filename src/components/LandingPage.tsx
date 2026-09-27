@@ -357,7 +357,7 @@ export function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {TRACKS.map((track) => (
+            {(!TRACKS || TRACKS.length === 0 || TRACKS.some((tr) => !tr)) ? null : TRACKS.map((track) => (
               <div key={track.id} className="relative rounded-2xl overflow-hidden border border-white/8 p-5 hover:border-white/20 transition-all group"
                 style={{ background: `linear-gradient(135deg, ${track.tone}12 0%, rgba(255,255,255,0.02) 100%)` }}>
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
