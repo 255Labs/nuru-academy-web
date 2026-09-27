@@ -31,8 +31,8 @@ export default async function RootPage() {
           <RecommendedForYou />
         </div>
 
-        {/* Right column — fixed-height viewport, scrolls on its own, never tied to left */}
-        <aside className="hidden xl:flex flex-col gap-5 w-[316px] shrink-0 sticky top-6 h-[calc(100vh-5rem)] overflow-y-auto pb-6 scrollbar-hide">
+        {/* Right column — sticky, scrollable independently on tall screens */}
+        <aside className="hidden xl:flex flex-col gap-5 w-[316px] shrink-0 sticky top-6 max-h-[calc(100vh-4rem)] overflow-y-auto pb-8 pr-1" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(107,78,255,0.25) transparent" }}>
           <Leaderboard />
           <QuestList />
           <StreakCalendar />
