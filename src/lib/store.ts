@@ -25,10 +25,10 @@ export const AGE_TIER_META: Record<AgeTier, {
   label: string; range: string; icon: string;
   xpMultiplier: number; uiMode: "playful" | "standard" | "focused";
 }> = {
-  child:        { label: "Explorer",     range: "Ages 6–12",  icon: "🌟", xpMultiplier: 1.5, uiMode: "playful"  },
-  teen:         { label: "Challenger",   range: "Ages 13–17", icon: "⚡", xpMultiplier: 1.2, uiMode: "playful"  },
-  adult:        { label: "Learner",      range: "Ages 18+",   icon: "📚", xpMultiplier: 1.0, uiMode: "standard" },
-  professional: { label: "Professional", range: "Working adult", icon: "🚀", xpMultiplier: 1.0, uiMode: "focused" },
+  child:        { label: "Explorer",     range: "Ages 6–12",  icon: "", xpMultiplier: 1.5, uiMode: "playful"  },
+  teen:         { label: "Challenger",   range: "Ages 13–17", icon: "", xpMultiplier: 1.2, uiMode: "playful"  },
+  adult:        { label: "Learner",      range: "Ages 18+",   icon: "", xpMultiplier: 1.0, uiMode: "standard" },
+  professional: { label: "Professional", range: "Working adult", icon: "", xpMultiplier: 1.0, uiMode: "focused" },
 };
 
 export interface Profile {
@@ -464,7 +464,8 @@ export const useGameStore = create<GameState>()(
 );
 
 export function trackTotalNodes(trackId: TrackId) {
-  const track = TRACKS.find((t) => t.id === trackId)!;
+  const track = TRACKS.find((t) => t.id === trackId);
+  if (!track) return 0;
   return track.modules.reduce((a, m) => a + m.lessons.length + (m.quiz ? 1 : 0), 0);
 }
 
