@@ -2,11 +2,12 @@
 
 import { Skull, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { TRACKS } from "@/data/curriculum";
+import { useTracks } from "@/lib/curriculum-db";
 import { useGameStore } from "@/lib/store";
 
 export function BossBattleCard() {
   const router = useRouter();
+  const { tracks } = useTracks();
   const activeTrack = useGameStore((s) => s.activeTrack);
   const activeModuleIdx = useGameStore((s) => {
     const idx = s.activeModuleIdx;
@@ -15,7 +16,7 @@ export function BossBattleCard() {
       : 0;
   });
 
-  const track = TRACKS.find((t) => t.id === activeTrack) ?? TRACKS[0];
+  const track = tracks.find((t) => t.id === activeTrack) ?? tracks[0];
   if (!track) return null;
 
   const safeModuleIdx = Math.min(activeModuleIdx, track.modules.length - 1);
@@ -23,7 +24,7 @@ export function BossBattleCard() {
   if (!mod) return null;
 
   return (
-    <div className="rounded-2xl2 p-5 bg-gradient-to-br from-[#241033] to-[#3A1750] text-white relative overflow-hidden shadow-pop">
+    <div className="rounded-2xl p-5 bg-gradient-to-br from-[#241033] to-[#3A1750] text-white relative overflow-hidden shadow-pop">
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5">
           <span className="w-7 h-7 rounded-lg bg-white/10 grid place-items-center shrink-0">
