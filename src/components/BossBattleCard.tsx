@@ -8,9 +8,19 @@ import { useGameStore } from "@/lib/store";
 export function BossBattleCard() {
   const router = useRouter();
   const activeTrack = useGameStore((s) => s.activeTrack);
-  const activeModuleIdx = useGameStore((s) => s.activeModuleIdx[activeTrack]);
-  const track = TRACKS.find((t) => t.id === activeTrack)!;
-  const mod = track.modules[activeModuleIdx];
+  const activeModuleIdx = useGameStore((s) => {
+    const idx = s.activeModuleIdx;
+    return (typeof idx === "object" && idx !== null)
+      ? ((idx as Record<string, number>)[activeTrack] ?? 0)
+      : 0;
+  });
+
+  const track = TRACKS.find((t) => t.id === activeTrack) ?? TRACKS[0];
+  if (!track) return null;
+
+  const safeModuleIdx = Math.min(activeModuleIdx, track.modules.length - 1);
+  const mod = track.modules[safeModuleIdx];
+  if (!mod) return null;
 
   return (
     <div className="rounded-2xl2 p-5 bg-gradient-to-br from-[#241033] to-[#3A1750] text-white relative overflow-hidden shadow-pop">
