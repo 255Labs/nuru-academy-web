@@ -28,12 +28,8 @@ export function HeroBanner() {
   const [mood, setMood]         = useState<NuruMood>("wave");
   const [moodIdx, setMoodIdx]   = useState(0);
   const [bobClass, setBobClass] = useState("nuru-float");
-  const [imgIdx, setImgIdx]     = useState(0);
 
-  useEffect(() => {
-    setHour(new Date().getHours());
-    setImgIdx(new Date().getDay() % BANNER_IMAGES.length);
-  }, []);
+  useEffect(() => setHour(new Date().getHours()), []);
 
   // Cycle Nuru's mood every 4s with a bounce on change
   useEffect(() => {
@@ -54,6 +50,8 @@ export function HeroBanner() {
     : hour < 18 ? t("hero.good_afternoon")
     : t("hero.good_evening");
 
+  const imgIdx = new Date().getDay() % BANNER_IMAGES.length;
+
   const QUICK_ACTIONS = [
     { icon: BookOpen,    labelKey: "hero.quick.explain", href: "/study-room" },
     { icon: HelpCircle,  labelKey: "hero.quick.quiz",    href: "/courses" },
@@ -73,7 +71,7 @@ export function HeroBanner() {
 
   return (
     <div className="relative rounded-3xl overflow-hidden flex flex-col justify-end"
-      style={{ minHeight: 220 }}>
+      style={{ minHeight: 260 }}>
 
       {/* Background image */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -99,26 +97,26 @@ export function HeroBanner() {
       />
 
       {/* ── Floating Nuru robot — right side ─────────────────────────── */}
-      <div className="absolute right-6 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none select-none">
+      <div className="absolute right-4 md:right-8 bottom-4 z-20 flex flex-col items-center gap-1.5 pointer-events-none select-none">
 
-        {/* Glow ring behind robot */}
-        <div className="absolute inset-0 rounded-full blur-2xl opacity-40 pointer-events-none"
-          style={{ background: "radial-gradient(circle, #6B4EFF 0%, transparent 70%)", width: 120, height: 120, top: "50%", left: "50%", transform: "translate(-50%, -60%)" }} />
+        {/* Glow halo behind robot */}
+        <div className="absolute rounded-full blur-3xl opacity-45 pointer-events-none"
+          style={{ background: "radial-gradient(circle, #6B4EFF 0%, transparent 70%)", width: 130, height: 130, top: "50%", left: "50%", transform: "translate(-50%, -55%)" }} />
 
         {/* The robot itself */}
-        <div className={bobClass} style={{ filter: "drop-shadow(0 8px 24px rgba(107,78,255,0.5))" }}>
-          <Nuru size={96} mood={mood} />
+        <div className={bobClass} style={{ filter: "drop-shadow(0 10px 28px rgba(107,78,255,0.55))" }}>
+          <Nuru size={110} mood={mood} />
         </div>
 
-        {/* "Online" pulse dot */}
-        <div className="flex items-center gap-1 bg-black/30 backdrop-blur rounded-full px-2 py-0.5">
+        {/* "Online" badge */}
+        <div className="flex items-center gap-1 bg-black/35 backdrop-blur-sm rounded-full px-2.5 py-1">
           <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-[9px] font-bold text-white/80 uppercase tracking-wide">Nuru AI</span>
+          <span className="text-[9px] font-bold text-white/85 uppercase tracking-wider">Nuru AI</span>
         </div>
       </div>
 
       {/* Content — padded right so it doesn't overlap Nuru */}
-      <div className="relative z-10 p-5 md:p-6 pr-32 md:pr-36">
+      <div className="relative z-10 p-5 md:p-6 pr-36 md:pr-40">
         {/* XP badge top-right — moved to top-left to avoid overlap */}
         <div className="absolute top-4 left-5 flex items-center gap-1.5 bg-white/10 backdrop-blur border border-white/20 rounded-full px-2.5 py-1">
           <Sparkles size={11} className="text-nuru-gold" />
@@ -126,27 +124,30 @@ export function HeroBanner() {
         </div>
 
         {/* Greeting */}
-        <div className="mb-1 mt-6">
-          <div className="text-white/60 text-xs font-semibold uppercase tracking-wide">{timeGreeting}</div>
-          <h1 className="font-display font-extrabold text-xl md:text-2xl text-white leading-tight mt-0.5">
+        <div className="mb-2 mt-6">
+          <div className="text-white/70 text-[11px] font-extrabold uppercase tracking-[0.18em] mb-0.5">
+            {timeGreeting} 🌞
+          </div>
+          <h1 className="font-display font-extrabold text-2xl md:text-3xl text-white leading-tight">
             {displayName || "Learner"} 👋
           </h1>
-          <p className="text-white/65 text-xs mt-0.5 max-w-sm">{t("hero.keep_going")}</p>
+          <p className="text-white/60 text-[12px] mt-1 max-w-xs">{t("hero.keep_going")}</p>
         </div>
 
         {/* Search input */}
-        <form onSubmit={askNuru} className="relative max-w-sm mt-3 mb-3">
-          <div className="flex items-center bg-white/12 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden hover:border-white/35 transition-colors focus-within:border-white/40">
+        <form onSubmit={askNuru} className="relative max-w-md mt-3 mb-3">
+          <div className="flex items-center bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl overflow-hidden hover:border-white/40 transition-all focus-within:border-white/50 focus-within:bg-white/20"
+            style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.18)" }}>
             <input
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               onFocus={() => { setMood("think"); }}
               placeholder={t("hero.ask_nuru")}
-              className="flex-1 bg-transparent text-white text-sm px-4 py-2.5 outline-none placeholder:text-white/40"
+              className="flex-1 bg-transparent text-white text-[13px] px-4 py-3 outline-none placeholder:text-white/45 font-medium"
             />
             <button type="submit"
-              className="px-3 py-2.5 text-white/60 hover:text-white transition-colors flex items-center">
-              <Send size={14} />
+              className="px-4 py-3 text-white/70 hover:text-white transition-colors flex items-center">
+              <Send size={15} />
             </button>
           </div>
         </form>
@@ -155,8 +156,8 @@ export function HeroBanner() {
         <div className="flex gap-2 flex-wrap">
           {QUICK_ACTIONS.map(({ icon: Icon, labelKey, href }) => (
             <button key={labelKey} onClick={() => router.push(href)}
-              className="flex items-center gap-1.5 bg-white/10 backdrop-blur hover:bg-white/18 border border-white/15 hover:border-white/30 transition-all rounded-lg px-2.5 py-1.5 text-white text-[11px] font-semibold">
-              <Icon size={11} />
+              className="flex items-center gap-1.5 bg-white/12 backdrop-blur-sm hover:bg-white/22 border border-white/20 hover:border-white/38 transition-all rounded-full px-3 py-1.5 text-white text-[11px] font-bold tracking-wide">
+              <Icon size={11} className="opacity-80" />
               {t(labelKey)}
             </button>
           ))}
