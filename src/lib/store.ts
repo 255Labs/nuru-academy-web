@@ -489,8 +489,7 @@ export function isTrackUnlocked(
   missionsPassed: Record<string, boolean>,
   purchasedTracks: string[] = []
 ): boolean {
-  const track = TRACKS.find((t) => t.id === trackId)!;
-  if (!track.requires) return true;
+  const track = TRACKS.find((t) => t.id === trackId);`n  if (!track) return true; // unknown track — don't hard-lock`n  if (!track.requires) return true;
   if (purchasedTracks.includes(trackId)) return true;
 
   const prereqTrack = TRACKS.find((t) => t.subtitle === track.requires);
@@ -499,3 +498,4 @@ export function isTrackUnlocked(
   const emberfall = prereqTrack.modules[prereqTrack.modules.length - 1];
   return !!missionsPassed[`${prereqTrack.id}:${emberfall.id}`];
 }
+
