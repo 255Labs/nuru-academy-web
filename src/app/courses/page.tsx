@@ -296,7 +296,12 @@ export default function CoursesPage() {
   const { tracks: TRACKS } = useTracks();
   const activeTrack        = useGameStore((s) => s.activeTrack);
   const setActiveTrack     = useGameStore((s) => s.setActiveTrack);
-  const activeModuleIdx    = useGameStore((s) => s.activeModuleIdx[activeTrack]);
+  const activeModuleIdx    = useGameStore((s) => {
+    const idx = s.activeModuleIdx;
+    return (typeof idx === "object" && idx !== null)
+      ? ((idx as Record<string, number>)[activeTrack] ?? 0)
+      : 0;
+  });
   const setActiveModuleIdx = useGameStore((s) => s.setActiveModuleIdx);
   const progress           = useGameStore((s) => s.progress[activeTrack]);
   const completeLesson     = useGameStore((s) => s.completeLesson);
