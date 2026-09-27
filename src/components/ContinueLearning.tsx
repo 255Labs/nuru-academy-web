@@ -46,12 +46,13 @@ export function ContinueLearning() {
   // card instead of implying Intermediate/Expert are equally available.
   const cards = TRACKS.filter((tr) => isTrackUnlocked(tr.id as TrackId, missionsPassed, purchasedTracks)).map((tr) => {
     const total = trackTotalNodes(tr.id as TrackId);
-    const done = progress[tr.id as TrackId];
+    const done = progress[tr.id as TrackId] ?? 0;
     const pct = Math.min(100, Math.round((done / total) * 100));
     const remaining = Math.max(1, total - done);
-    const moduleIdx = Math.min(
+    const firstModLessons = tr.modules[0]?.lessons?.length ?? 0;
+    const moduleIdx = tr.modules.length === 0 ? 0 : Math.min(
       tr.modules.length - 1,
-      Math.floor(done / (tr.modules[0].lessons.length + 1))
+      firstModLessons > 0 ? Math.floor(done / (firstModLessons + 1)) : 0
     );
     return { track: tr, pct, moduleIdx, minLeft: remaining * 4 };
   });
@@ -67,6 +68,7 @@ export function ContinueLearning() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {cards.map(({ track, pct, moduleIdx, minLeft }) => {
           const mod = track.modules[moduleIdx];
+          if (!mod) return null;
           return (
             <button
               key={track.id}
