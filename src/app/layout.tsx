@@ -15,7 +15,7 @@ import { ThemeSync } from "@/components/ThemeSync";
 
 export const metadata: Metadata = {
   title: "Nuru AI Academy",
-  description: "Tanzania's AI Powered, gamified skill-building academy — AI & Business Automation, Airbnb & Booking.com Operations, IT Fundamentals and more.",
+  description: "Tanzania's gamified skill-building academy — AI & Business Automation, Airbnb & Booking.com Operations, and IT Fundamentals.",
 };
 
 // Runs synchronously before hydration so the correct theme class is present
@@ -36,13 +36,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
-        {/* Preload Nuru assets so they're ready before any component needs them */}
+        {/* Preload sprite sheet — used immediately by game components */}
         <link rel="preload" href="/nuru/sprites.png" as="image" />
-        <link rel="preload" href="/nuru/hero.png" as="image" />
-      </head>
-      <body className="font-body bg-nuru-bg text-nuru-ink antialiased">
         {/* Mux player web component — loaded async, only activates when MuxVideoPlayer is used */}
         <script async src="https://cdn.jsdelivr.net/npm/@mux/mux-player" />
+      </head>
+      <body className="font-body bg-nuru-bg text-nuru-ink antialiased">
         <Suspense fallback={null}>
           <ThemeSync />
         </Suspense>
