@@ -332,6 +332,14 @@ export default function CoursesPage() {
   }
 
   const track = TRACKS.find((t) => t.id === activeTrack) ?? TRACKS[0];
+  if (!track) {
+    return (
+      <Shell>
+        <TopBar title="My Courses" subtitle="Loading…" />
+        <div className="flex items-center justify-center py-20 text-nuru-muted text-sm">Loading courses…</div>
+      </Shell>
+    );
+  }
   const safeModuleIdx = Math.min(activeModuleIdx, track.modules.length - 1);
   const mod   = track.modules[safeModuleIdx];
   const nodes = nodesOf(mod);
