@@ -17,6 +17,7 @@ export function BottomNav() {
     { href: "/arena",    labelKey: "nav.arena",    icon: Swords },
     { href: "/settings", labelKey: "nav.settings", icon: User },
   ];
+  // Competitions (/compete) is commented out until it's ready
 
   return (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-nuru-card border-t border-nuru-line px-6 py-2.5 flex items-center justify-between z-30">
