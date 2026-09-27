@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Lock, Sparkles, ArrowRight } from "lucide-react";
+import { ArrowRight, Clock } from "lucide-react";
 import { useGameStore, isTrackUnlocked } from "@/lib/store";
 import { useTracks } from "@/lib/curriculum-db";
 import type { TrackId } from "@/lib/store";
@@ -52,10 +52,13 @@ export function RecommendedForYou() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {recommended.map((t) => {
           const firstModule = t.modules[0];
           if (!firstModule) return null;
+
+          /* Derive a darker/more opaque tone for the banner overlay */
+          const bannerBg = (t.toneDeep ?? t.tone) + "DD";
 
           return (
             <button
@@ -64,61 +67,61 @@ export function RecommendedForYou() {
                 setActiveTrack(t.id as TrackId);
                 router.push("/courses");
               }}
-              className="group relative rounded-2xl overflow-hidden border border-nuru-line text-left transition-all duration-200 hover:shadow-[0_8px_32px_-8px_rgba(107,78,255,0.25)] hover:-translate-y-0.5 bg-nuru-card"
+              className="group relative rounded-2xl overflow-hidden text-left transition-all duration-200 hover:-translate-y-0.5 bg-nuru-card"
+              style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.14)" }}
             >
-              {/* Cover image */}
-              <div className="relative w-full h-32 overflow-hidden">
+              {/* ── Full cover image fills the card ── */}
+              <div className="relative w-full overflow-hidden" style={{ height: 220 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={REC_COVER[t.id] ?? REC_COVER.beginner}
-                  alt=""
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  alt={t.name}
+                  className="w-full h-full object-cover object-left transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
 
-                {/* Track badge */}
-                <span
-                  className="absolute top-3 left-3 text-[10px] font-bold tracking-wider uppercase text-white px-2.5 py-1 rounded-full"
-                  style={{ background: t.tone + "cc" }}
+                {/* Gradient fade at bottom for text legibility */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+                {/* ── Colored banner across the top ── */}
+                <div
+                  className="absolute top-0 left-0 right-0 px-4 py-2.5 flex items-center justify-between"
+                  style={{ background: bannerBg }}
                 >
-                  {t.subtitle}
-                </span>
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-white/90">
+                    {t.subtitle ?? t.name}
+                  </span>
+                  <span className="text-[10px] font-semibold text-white/70 flex items-center gap-1">
+                    <Clock size={9} /> 4 min · Free first lesson
+                  </span>
+                </div>
 
-                {/* "First lesson free" badge */}
-                <span className="absolute top-3 right-3 flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-nuru-gold/90 text-nuru-ink">
-                  <Sparkles size={9} /> Free Trial
-                </span>
-
-                {/* Lock overlay at bottom of image */}
-                <div className="absolute bottom-2 right-3 flex items-center gap-1 text-white/70">
-                  <Lock size={12} />
-                  <span className="text-[10px] font-semibold">TZS {(t.priceTZS ?? 0).toLocaleString()}</span>
+                {/* ── Course name over the image at bottom ── */}
+                <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
+                  <div className="font-bold text-white text-[18px] leading-snug mb-1 line-clamp-2"
+                    style={{ textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}>
+                    {t.name}
+                  </div>
+                  <div className="text-white/70 text-[12px]">
+                    {firstModule.name}
+                  </div>
                 </div>
               </div>
 
-              {/* Card body */}
-              <div className="p-4">
-                <div className="font-semibold text-nuru-ink text-[14px] leading-snug mb-1 line-clamp-2">
-                  {firstModule.name}
-                </div>
-                <div className="text-[11px] text-nuru-muted mb-3">{t.name}</div>
-
-                {/* First lesson free callout */}
-                <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-3">
-                  <Sparkles size={11} className="text-amber-600 shrink-0" />
-                  <span className="text-[11px] font-semibold text-amber-700">First lesson is free — no payment needed</span>
-                </div>
-
-                <div className="flex items-center justify-between text-[11px] text-nuru-muted">
-                  <span>{t.modules.length} modules</span>
-                  <span>{t.passingPct}% to pass</span>
-                </div>
-
-                {/* CTA */}
-                <div className="mt-3 w-full bg-nuru-lav text-nuru-purple text-xs font-bold rounded-xl py-2.5 flex items-center justify-center gap-1.5 transition-colors group-hover:bg-nuru-purple group-hover:text-white">
-                  Try First Lesson Free
-                  <ArrowRight size={13} />
+              {/* ── CTA row below image ── */}
+              <div
+                className="flex items-center justify-between px-4 py-3 transition-colors"
+                style={{ background: t.tone + "18" }}
+              >
+                <span className="text-[12px] text-nuru-ink font-medium">
+                  {t.modules.length} modules · Start free
+                </span>
+                <div
+                  className="flex items-center gap-1.5 text-[12px] font-bold px-3 py-1.5 rounded-full transition-all group-hover:gap-2"
+                  style={{ color: t.tone, border: `1.5px solid ${t.tone}` }}
+                >
+                  Start Course
+                  <ArrowRight size={12} />
                 </div>
               </div>
             </button>
