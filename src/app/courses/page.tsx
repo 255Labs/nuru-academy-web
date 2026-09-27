@@ -752,6 +752,23 @@ export default function CoursesPage() {
           weekLabel={`Week ${mod.week}`}
           onClose={() => setQuestOpen(false)}
           onFinish={async (passed, pct) => {
+            // Always record today in study_log when a quiz is attempted,
+            // pass or fail — the DB's submit_quiz_attempt RPC now does this
+            // too (migration 017), but this client-side upsert is a
+            // belt-and-suspenders fallback so the streak survives even on
+            // older DB deployments where the migration hasn't run yet.
+            const supabase = createClient();
+            const today = new Date().toISOString().slice(0, 10);
+            supabase
+              .from("study_log")
+              .upsert(
+                { study_date: today, minutes: 15 },
+                { onConflict: "user_id,study_date", ignoreDuplicates: false }
+              )
+              .then(({ error }) => {
+                if (error) console.warn("study_log upsert failed:", error);
+              });
+
             if (passed) {
               passMission(activeTrack, mod.id, pct);
               const result = await advanceQuest("quiz");
