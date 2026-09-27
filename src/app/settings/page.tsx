@@ -209,32 +209,6 @@ export default function SettingsPage() {
             </button>
           </Section>
 
-          {/* Role — local preview */}
-          <Section title={t("settings.role_local")}>
-            <p className="text-xs text-nuru-muted leading-relaxed mb-4">
-              {t("settings.role_note")}{" "}
-              <code className="text-[11px] bg-nuru-lav px-1.5 py-0.5 rounded font-mono">
-                /nrx-ctrl-9f4a
-              </code>
-            </p>
-            <div className="flex gap-2">
-              {(["student", "admin"] as const).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => updateProfile({ role: r })}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold capitalize transition-all ${
-                    profile.role === r
-                      ? "bg-nuru-purple text-white shadow-pop"
-                      : "bg-nuru-bg text-nuru-ink2 border-2 border-nuru-line hover:border-nuru-purple/40"
-                  }`}
-                >
-                  {r === "admin" && <ShieldCheck size={14} />}
-                  {t(r === "admin" ? "general.admin" : "general.student")}
-                </button>
-              ))}
-            </div>
-          </Section>
-
           {/* Language */}
           <Section title={t("settings.display_lang")}>
             <LanguageToggle />
