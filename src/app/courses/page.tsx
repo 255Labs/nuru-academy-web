@@ -20,8 +20,6 @@ import { useGameStore, isTrackUnlocked } from "@/lib/store";
 import type { TrackId } from "@/lib/store";
 import type { JourneyNode, Lesson, DailyChallenge } from "@/lib/types";
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
 import type { CourseModule } from "@/lib/types";
 
 function nodesOf(mod: CourseModule): JourneyNode[] {
@@ -31,7 +29,6 @@ function nodesOf(mod: CourseModule): JourneyNode[] {
   ];
 }
 
-// A module is "advanced" (paid-only) if it is not the first module of the track
 function isAdvancedModule(moduleIdx: number) {
   return moduleIdx > 0;
 }
@@ -44,8 +41,6 @@ const TAB_META: { id: LearningTab; label: string; icon: typeof BookOpen }[] = [
   { id: "notes",     label: "Notes",           icon: FileText },
   { id: "challenge", label: "Daily Challenge", icon: Zap },
 ];
-
-// ── Daily Challenge component ──────────────────────────────────────────────────
 
 function DailyChallengePanel({
   challenge, tone, lessonTitle, onComplete,
@@ -165,10 +160,7 @@ function DailyChallengePanel({
   );
 }
 
-// ── Notes panel ────────────────────────────────────────────────────────────────
-
 function NotesPanel({ lesson, tone }: { lesson: Lesson; tone: string }) {
-  // Auto-generate structured notes from lesson content when no manual notes exist
   const notes = lesson.notes ?? [
     `# ${lesson.title}`,
     ``,
@@ -183,7 +175,6 @@ function NotesPanel({ lesson, tone }: { lesson: Lesson; tone: string }) {
     ...(lesson.homework ? [``, `## Homework`, lesson.homework] : []),
   ].join("\n");
 
-  // Simple markdown-to-JSX renderer (handles h1, h2, bold, numbered lists)
   function renderNotes(md: string) {
     return md.split("\n").map((line, i) => {
       if (line.startsWith("# ")) {
@@ -239,8 +230,6 @@ function NotesPanel({ lesson, tone }: { lesson: Lesson; tone: string }) {
     </div>
   );
 }
-
-// ── Paywall gate ───────────────────────────────────────────────────────────────
 
 function AdvancedPaywall({
   trackName, priceTZS, tone,
@@ -305,19 +294,37 @@ function AdvancedPaywall({
 
 export default function CoursesPage() {
   const { tracks: TRACKS } = useTracks();
-  const activeTrack     = useGameStore((s) => s.activeTrack);
-  const setActiveTrack  = useGameStore((s) => s.setActiveTrack);
-  const activeModuleIdx = useGameStore((s) => s.activeModuleIdx[activeTrack]);
+  const activeTrack        = useGameStore((s) => s.activeTrack);
+  const setActiveTrack     = useGameStore((s) => s.setActiveTrack);
+  const activeModuleIdx    = useGameStore((s) => s.activeModuleIdx[activeTrack]);
   const setActiveModuleIdx = useGameStore((s) => s.setActiveModuleIdx);
-  const progress        = useGameStore((s) => s.progress[activeTrack]);
-  const completeLesson  = useGameStore((s) => s.completeLesson);
-  const passMission     = useGameStore((s) => s.passMission);
-  const missionsPassed  = useGameStore((s) => s.missionsPassed);
-  const purchasedTracks = useGameStore((s) => s.purchasedTracks);
-  const advanceQuest    = useGameStore((s) => s.advanceQuest);
-  const claimQuestReward = useGameStore((s) => s.claimQuestReward);
-  const loadTodayQuests = useGameStore((s) => s.loadTodayQuests);
-  const logStudyMinutes = useGameStore((s) => s.logStudyMinutes);
+  const progress           = useGameStore((s) => s.progress[activeTrack]);
+  const completeLesson     = useGameStore((s) => s.completeLesson);
+  const passMission        = useGameStore((s) => s.passMission);
+  const missionsPassed     = useGameStore((s) => s.missionsPassed);
+  const purchasedTracks    = useGameStore((s) => s.purchasedTracks);
+  const advanceQuest       = useGameStore((s) => s.advanceQuest);
+  const claimQuestReward   = useGameStore((s) => s.claimQuestReward);
+  const loadTodayQuests    = useGameStore((s) => s.loadTodayQuests);
+  const logStudyMinutes    = useGameStore((s) => s.logStudyMinutes);
+
+  const [lessonOpen, setLessonOpen]     = useState<{ lesson: Lesson; done?: boolean } | null>(null);
+  const [activeTab, setActiveTab]       = useState<LearningTab>("lesson");
+  const [purchaseTarget, setPurchaseTarget] = useState<{
+    id: string; name: string; priceTZS: string; tone: string;
+  } | null>(null);
+  const [showPaywall, setShowPaywall]   = useState(false);
+  const [questOpen, setQuestOpen]       = useState(false);
+
+  // Guard: wait for tracks to load from DB
+  if (!TRACKS || TRACKS.length === 0) {
+    return (
+      <Shell>
+        <TopBar title="My Courses" subtitle="Loading…" />
+        <div className="flex items-center justify-center py-20 text-nuru-muted text-sm">Loading courses…</div>
+      </Shell>
+    );
+  }
 
   const track = TRACKS.find((t) => t.id === activeTrack) ?? TRACKS[0];
   const safeModuleIdx = Math.min(activeModuleIdx, track.modules.length - 1);
@@ -325,19 +332,10 @@ export default function CoursesPage() {
   const nodes = nodesOf(mod);
   const cur   = Math.min(progress, nodes.length);
 
-  const [lessonOpen, setLessonOpen]   = useState<{ lesson: Lesson; done?: boolean } | null>(null);
-  const [activeTab, setActiveTab]     = useState<LearningTab>("lesson");
-  const [purchaseTarget, setPurchaseTarget] = useState<{
-    id: string; name: string; priceTZS: string; tone: string;
-  } | null>(null);
-  const [showPaywall, setShowPaywall] = useState(false);
-  const [questOpen, setQuestOpen]     = useState(false);
-
-  // Whether the current module is gated behind payment
   const isTrackPaid = isTrackUnlocked(activeTrack, missionsPassed, purchasedTracks);
   const moduleGated = isAdvancedModule(activeModuleIdx) && !isTrackPaid;
 
-  const curNode  = nodes[Math.min(cur, nodes.length - 1)];
+  const curNode   = nodes[Math.min(cur, nodes.length - 1)];
   const isQuestUp = curNode?.kind === "quest";
 
   function onNode(i: number, status: "done" | "current" | "locked", node: JourneyNode) {
@@ -362,7 +360,7 @@ export default function CoursesPage() {
   function selectModule(idx: number) {
     const advanced = isAdvancedModule(idx);
     const unlocked = isTrackUnlocked(activeTrack, missionsPassed, purchasedTracks);
-    const canOpen = idx === 0 || missionsPassed[`${activeTrack}:${track.modules[idx - 1].id}`] || idx <= activeModuleIdx;
+    const canOpen  = idx === 0 || missionsPassed[`${activeTrack}:${track.modules[idx - 1].id}`] || idx <= activeModuleIdx;
     if (!canOpen) return;
     if (advanced && !unlocked) { setShowPaywall(true); return; }
     setActiveModuleIdx(activeTrack, idx);
@@ -372,10 +370,9 @@ export default function CoursesPage() {
     <Shell>
       <TopBar title="My Courses" subtitle="Learn through lessons, video tutorials, notes, and daily challenges." />
 
-      {/* ── Track tabs ──────────────────────────────────────────────────────── */}
       <div className="flex gap-2 mb-5 flex-wrap">
         {TRACKS.map((t) => {
-          const on = t.id === activeTrack;
+          const on       = t.id === activeTrack;
           const unlocked = isTrackUnlocked(t.id as TrackId, missionsPassed, purchasedTracks);
           return (
             <button
@@ -411,7 +408,6 @@ export default function CoursesPage() {
         />
       )}
 
-      {/* ── Week chips ──────────────────────────────────────────────────────── */}
       <div className="bg-nuru-card rounded-2xl p-3.5 mb-5 shadow-card border border-nuru-line">
         <div className="flex gap-2.5 overflow-x-auto pb-1">
           {track.modules.map((m, i) => {
@@ -419,7 +415,6 @@ export default function CoursesPage() {
             const active   = i === activeModuleIdx;
             const canOpen  = i === 0 || missionsPassed[`${track.id}:${track.modules[i - 1].id}`] || i <= activeModuleIdx;
             const isLocked = isAdvancedModule(i) && !isTrackPaid;
-
             return (
               <button
                 key={m.id}
@@ -445,12 +440,9 @@ export default function CoursesPage() {
         </div>
       </div>
 
-      {/* ── Paywall banner for gated modules ───────────────────────────────── */}
       {moduleGated && (
-        <div
-          className="rounded-2xl p-4 mb-5 flex items-center gap-4 border-2"
-          style={{ borderColor: track.tone, background: `${track.tone}0A` }}
-        >
+        <div className="rounded-2xl p-4 mb-5 flex items-center gap-4 border-2"
+          style={{ borderColor: track.tone, background: `${track.tone}0A` }}>
           <AlertTriangle size={20} style={{ color: track.tone }} className="shrink-0" />
           <div className="flex-1">
             <div className="font-bold text-sm text-nuru-ink">Advanced content — subscription required</div>
@@ -468,11 +460,8 @@ export default function CoursesPage() {
         </div>
       )}
 
-      {/* ── Guide bar ───────────────────────────────────────────────────────── */}
-      <div
-        className="rounded-2xl p-5 mb-5 flex items-center gap-5 shadow-card border border-nuru-line flex-wrap"
-        style={{ background: `linear-gradient(90deg, ${track.tone}0F, white 60%)` }}
-      >
+      <div className="rounded-2xl p-5 mb-5 flex items-center gap-5 shadow-card border border-nuru-line flex-wrap"
+        style={{ background: `linear-gradient(90deg, ${track.tone}0F, white 60%)` }}>
         <div className="shrink-0"><Nuru size={62} /></div>
         <div className="flex-1 min-w-[220px]">
           {isQuestUp ? (
@@ -502,7 +491,6 @@ export default function CoursesPage() {
         </button>
       </div>
 
-      {/* ── Journey map ────────────────────────────────────────────────────── */}
       <div className="bg-nuru-card rounded-2xl pt-4 pb-6 shadow-card border border-nuru-line mb-5">
         <div className="px-5 pb-3.5">
           <div className="text-[11px] font-bold tracking-wide uppercase" style={{ color: track.tone }}>
@@ -518,20 +506,15 @@ export default function CoursesPage() {
         </div>
       </div>
 
-      {/* ── Learning Hub: all learning modes for each lesson ───────────────── */}
       {lessonOpen && !moduleGated && (
         <div className="fixed inset-0 z-[80] bg-nuru-ink/60 backdrop-blur-sm flex items-start justify-center overflow-y-auto p-4"
           onClick={() => setLessonOpen(null)}>
-          <div
-            className="bg-nuru-bg w-full max-w-3xl rounded-3xl shadow-2xl my-4 flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal header */}
-            <div className="p-6 text-white rounded-t-3xl relative" style={{ background: `linear-gradient(135deg, ${track.tone}, #241033)` }}>
-              <button
-                onClick={() => setLessonOpen(null)}
-                className="absolute top-4 right-4 w-8 h-8 rounded-xl bg-white/15 grid place-items-center hover:bg-white/25"
-              >
+          <div className="bg-nuru-bg w-full max-w-3xl rounded-3xl shadow-2xl my-4 flex flex-col"
+            onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 text-white rounded-t-3xl relative"
+              style={{ background: `linear-gradient(135deg, ${track.tone}, #241033)` }}>
+              <button onClick={() => setLessonOpen(null)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-xl bg-white/15 grid place-items-center hover:bg-white/25">
                 <X size={15} />
               </button>
               <div className="text-[11px] font-bold tracking-widest uppercase opacity-75">
@@ -541,21 +524,15 @@ export default function CoursesPage() {
               <p className="text-white/75 text-sm mt-1.5 leading-relaxed">{lessonOpen.lesson.objective}</p>
             </div>
 
-            {/* Learning mode tabs */}
             <div className="flex border-b border-nuru-line bg-nuru-card px-4 gap-1 overflow-x-auto">
               {TAB_META.filter((tab) => {
                 if (tab.id === "video" && !lessonOpen.lesson.videoId) return false;
                 return true;
               }).map(({ id, label, icon: Icon }) => (
-                <button
-                  key={id}
-                  onClick={() => setActiveTab(id)}
+                <button key={id} onClick={() => setActiveTab(id)}
                   className={`flex items-center gap-1.5 px-4 py-3.5 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
-                    activeTab === id
-                      ? "border-nuru-purple text-nuru-purple"
-                      : "border-transparent text-nuru-muted hover:text-nuru-ink"
-                  }`}
-                >
+                    activeTab === id ? "border-nuru-purple text-nuru-purple" : "border-transparent text-nuru-muted hover:text-nuru-ink"
+                  }`}>
                   <Icon size={14} />
                   {label}
                   {id === "challenge" && lessonOpen.lesson.dailyChallenge && (
@@ -565,9 +542,7 @@ export default function CoursesPage() {
               ))}
             </div>
 
-            {/* Tab content */}
             <div className="p-6 flex-1 overflow-y-auto">
-              {/* Lesson tab — the original LevelPlayer content inline */}
               {activeTab === "lesson" && (
                 <LevelPlayer
                   lesson={lessonOpen.lesson}
@@ -577,46 +552,27 @@ export default function CoursesPage() {
                   done={lessonOpen.done}
                   onClose={() => setLessonOpen(null)}
                   onComplete={async (elapsedMinutes) => {
-                    // 1. Update local progress state
                     completeLesson(activeTrack);
                     logStudyMinutes(elapsedMinutes);
                     setLessonOpen(null);
-
-                    // 2. Persist to DB
                     const supabase = createClient();
-                    await supabase.rpc("complete_lesson", {
-                      p_track_id: activeTrack,
-                      p_minutes: elapsedMinutes,
-                    });
-
-                    // 3. Advance lesson quest — DB is authoritative
+                    await supabase.rpc("complete_lesson", { p_track_id: activeTrack, p_minutes: elapsedMinutes });
                     const lessonResult = await advanceQuest("lesson");
-                    if (lessonResult.justCompleted) {
-                      // Quest just completed — reward is claimable in QuestList
-                      console.log("Lesson quest completed — reward available to claim");
-                    }
-
-                    // 4. Advance study time quest by real elapsed minutes
+                    if (lessonResult.justCompleted) console.log("Lesson quest completed — reward available to claim");
                     await advanceQuest("study20", elapsedMinutes);
-
-                    // 5. Reload quests to reflect DB state
                     await loadTodayQuests();
                   }}
                   inline
                 />
               )}
 
-              {/* Video tab */}
               {activeTab === "video" && lessonOpen.lesson.videoId && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase" style={{ color: track.tone }}>
                     <Video size={13} />
                     Video Tutorial · {lessonOpen.lesson.videoTitle ?? lessonOpen.lesson.title}
                   </div>
-                  <ProtectedVideoPlayer
-                    videoId={lessonOpen.lesson.videoId}
-                    title={lessonOpen.lesson.videoTitle ?? lessonOpen.lesson.title}
-                  />
+                  <ProtectedVideoPlayer videoId={lessonOpen.lesson.videoId} title={lessonOpen.lesson.videoTitle ?? lessonOpen.lesson.title} />
                   <div className="bg-nuru-lav rounded-xl px-4 py-3 flex items-start gap-2.5">
                     <Lock size={13} className="text-nuru-purple shrink-0 mt-0.5" />
                     <p className="text-xs text-nuru-ink2 leading-relaxed">
@@ -627,12 +583,8 @@ export default function CoursesPage() {
                 </div>
               )}
 
-              {/* Notes tab */}
-              {activeTab === "notes" && (
-                <NotesPanel lesson={lessonOpen.lesson} tone={track.tone} />
-              )}
+              {activeTab === "notes" && <NotesPanel lesson={lessonOpen.lesson} tone={track.tone} />}
 
-              {/* Daily Challenge tab */}
               {activeTab === "challenge" && (
                 lessonOpen.lesson.dailyChallenge ? (
                   <DailyChallengePanel
@@ -641,11 +593,8 @@ export default function CoursesPage() {
                     lessonTitle={lessonOpen.lesson.title}
                     onComplete={async (correct) => {
                       if (correct) {
-                        // Advance challenge quest — reward only if correct
                         const result = await advanceQuest("challenge");
-                        if (result.justCompleted) {
-                          console.log("Daily challenge quest completed — reward claimable");
-                        }
+                        if (result.justCompleted) console.log("Daily challenge quest completed — reward claimable");
                         await loadTodayQuests();
                       }
                     }}
@@ -667,7 +616,6 @@ export default function CoursesPage() {
         </div>
       )}
 
-      {/* Paywall modal */}
       {showPaywall && (
         <AdvancedPaywall
           trackName={track.name}
@@ -681,7 +629,6 @@ export default function CoursesPage() {
         />
       )}
 
-      {/* Mission quest */}
       {questOpen && mod.quiz && (
         <MissionQuestModal
           quiz={mod.quiz}
@@ -692,11 +639,8 @@ export default function CoursesPage() {
           onFinish={async (passed, pct) => {
             if (passed) {
               passMission(activeTrack, mod.id, pct);
-              // Advance quiz quest — XP/coins come from DB via claimQuestReward
               const result = await advanceQuest("quiz");
-              if (result.justCompleted) {
-                console.log("Quiz quest completed — reward claimable");
-              }
+              if (result.justCompleted) console.log("Quiz quest completed — reward claimable");
               await loadTodayQuests();
               if (activeModuleIdx < track.modules.length - 1) {
                 setTimeout(() => setActiveModuleIdx(activeTrack, activeModuleIdx + 1), 700);
