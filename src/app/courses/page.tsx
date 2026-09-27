@@ -29,6 +29,10 @@ function nodesOf(mod: CourseModule): JourneyNode[] {
   ];
 }
 
+/**
+ * Module 0 (Week 1) of every track is free for all users as a trial.
+ * Modules 1–4 (Weeks 2–5) require the track to be unlocked (purchased or earned).
+ */
 function isAdvancedModule(moduleIdx: number) {
   return moduleIdx > 0;
 }
@@ -313,6 +317,8 @@ export default function CoursesPage() {
   const loadTodayQuests    = useGameStore((s) => s.loadTodayQuests);
   const logStudyMinutes    = useGameStore((s) => s.logStudyMinutes);
 
+  // Any track can be browsed — first module (Week 1 / Lesson 1) is always free.
+  // Switching to a locked track shows Week 1 so users can experience it before paying.
   const [lessonOpen, setLessonOpen]     = useState<{ lesson: Lesson; done?: boolean } | null>(null);
   const [activeTab, setActiveTab]       = useState<LearningTab>("lesson");
   const [purchaseTarget, setPurchaseTarget] = useState<{
@@ -383,28 +389,29 @@ export default function CoursesPage() {
     <Shell>
       <TopBar title="My Courses" subtitle="Learn through lessons, video tutorials, notes, and daily challenges." />
 
-      <div className="flex gap-2 mb-5 flex-wrap">
+      {/* Track selector — all tracks are browsable; first lesson of each is free */}
+      <div className="flex gap-2 mb-5 overflow-x-auto pb-1 -mx-1 px-1">
         {TRACKS.map((t) => {
           const on       = t.id === activeTrack;
           const unlocked = isTrackUnlocked(t.id as TrackId, missionsPassed, purchasedTracks);
           return (
             <button
               key={t.id}
-              onClick={() =>
-                unlocked
-                  ? setActiveTrack(t.id as TrackId)
-                  : setPurchaseTarget({ id: t.id, name: t.name, priceTZS: t.priceTZS, tone: t.tone })
-              }
-              className={`px-3.5 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-all ${
+              onClick={() => setActiveTrack(t.id as TrackId)}
+              className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-all shrink-0 ${
                 on
-                  ? "bg-nuru-purple text-white shadow-pop"
-                  : unlocked
-                  ? "bg-nuru-card text-nuru-ink2 border border-nuru-line hover:border-nuru-purple/40"
-                  : "bg-nuru-lav text-nuru-muted hover:bg-nuru-purple/10"
+                  ? "text-white shadow-pop"
+                  : "bg-nuru-card text-nuru-ink2 border border-nuru-line hover:border-nuru-purple/40"
               }`}
+              style={on ? { background: t.tone } : undefined}
             >
-              {!unlocked && <Lock size={13} />}
+              {!unlocked && <Lock size={12} className="opacity-60" />}
               {t.subtitle}
+              {!unlocked && (
+                <span className="text-[9px] font-bold bg-white/20 px-1.5 py-0.5 rounded-full">
+                  Free trial
+                </span>
+              )}
             </button>
           );
         })}
@@ -454,21 +461,23 @@ export default function CoursesPage() {
       </div>
 
       {moduleGated && (
-        <div className="rounded-2xl p-4 mb-5 flex items-center gap-4 border-2"
+        <div className="rounded-2xl p-4 mb-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 border-2"
           style={{ borderColor: track.tone, background: `${track.tone}0A` }}>
-          <AlertTriangle size={20} style={{ color: track.tone }} className="shrink-0" />
-          <div className="flex-1">
-            <div className="font-bold text-sm text-nuru-ink">Advanced content — subscription required</div>
-            <div className="text-xs text-nuru-muted mt-0.5">
-              Unlock all 5 weeks — videos, notes, challenges, and quests — for TZS {track.priceTZS}.
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Star size={20} style={{ color: track.tone }} className="shrink-0" />
+            <div>
+              <div className="font-bold text-sm text-nuru-ink">Week 1 is free — unlock Weeks 2–5 to continue</div>
+              <div className="text-xs text-nuru-muted mt-0.5">
+                Full access: all 5 weeks, videos, notes, challenges, and quests for TZS {track.priceTZS} (one-time).
+              </div>
             </div>
           </div>
           <button
             onClick={() => setPurchaseTarget({ id: track.id, name: track.name, priceTZS: track.priceTZS, tone: track.tone })}
-            className="px-4 py-2 rounded-xl text-sm font-bold text-white shrink-0 flex items-center gap-1.5"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-bold text-white shrink-0 flex items-center justify-center gap-1.5"
             style={{ background: track.tone }}
           >
-            <CreditCard size={14} /> Unlock
+            <CreditCard size={14} /> Unlock Full Course
           </button>
         </div>
       )}
