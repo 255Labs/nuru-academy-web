@@ -319,7 +319,7 @@ export default function CoursesPage() {
   const loadTodayQuests = useGameStore((s) => s.loadTodayQuests);
   const logStudyMinutes = useGameStore((s) => s.logStudyMinutes);
 
-  const track = TRACKS.find((t) => t.id === activeTrack)!;
+  const track = TRACKS.find((t) => t.id === activeTrack) ?? TRACKS[0];
   const mod   = track.modules[activeModuleIdx];
   const nodes = nodesOf(mod);
   const cur   = Math.min(progress, nodes.length);
