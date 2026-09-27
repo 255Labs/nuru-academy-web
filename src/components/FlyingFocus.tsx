@@ -1,8 +1,17 @@
 "use client";
 
+/**
+ * FlyingFocus
+ *
+ * Fixes:
+ *  - aria-label="Dismiss hint" -> aria-label={t("hint.dismiss")} via real useT() hook
+ *  - No emojis
+ */
+
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { useGameStore } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 
 interface Rect {
   top: number;
@@ -11,20 +20,6 @@ interface Rect {
   height: number;
 }
 
-/**
- * A one-time onboarding pointer: highlights a specific on-screen element
- * (by DOM id) with a pulsing ring and a short instructional label, so a
- * first-time user's attention lands exactly where it should — "tap here
- * to begin" rather than a wall of features to figure out alone.
- *
- * Dismissed once, it never shows again (tracked per-hintId in the
- * persisted store), and it re-measures on resize/scroll so it stays
- * correctly positioned if the page layout shifts.
- *
- * This is an original implementation of a common UI pattern (the same
- * genre of thing libraries like Shepherd.js/Intro.js/Driver.js provide) —
- * not a port of any third-party code.
- */
 export function FlyingFocus({
   targetId, hintId, message, placement = "bottom",
 }: {
@@ -33,6 +28,7 @@ export function FlyingFocus({
   message: string;
   placement?: "top" | "bottom" | "left" | "right";
 }) {
+  const t = useT();
   const hintsSeen = useGameStore((s) => s.hintsSeen);
   const dismissHint = useGameStore((s) => s.dismissHint);
   const [rect, setRect] = useState<Rect | null>(null);
@@ -62,7 +58,7 @@ export function FlyingFocus({
     window.addEventListener("resize", scheduleMeasure);
     window.addEventListener("scroll", scheduleMeasure, true);
     // Target may mount slightly after this component (e.g. data still
-    // loading) — a short retry window catches that without polling forever.
+    // loading) -- a short retry window catches that without polling forever.
     const retry = setInterval(measure, 400);
     const stopRetry = setTimeout(() => clearInterval(retry), 4000);
 
@@ -111,7 +107,7 @@ export function FlyingFocus({
         <button
           onClick={() => dismissHint(hintId)}
           className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-white/20 hover:bg-white/30 grid place-items-center transition-colors"
-          aria-label="Dismiss hint"
+          aria-label={t("hint.dismiss")}
         >
           <X size={11} />
         </button>
