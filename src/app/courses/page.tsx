@@ -320,7 +320,8 @@ export default function CoursesPage() {
   const logStudyMinutes = useGameStore((s) => s.logStudyMinutes);
 
   const track = TRACKS.find((t) => t.id === activeTrack) ?? TRACKS[0];
-  const mod   = track.modules[activeModuleIdx];
+  const safeModuleIdx = Math.min(activeModuleIdx, track.modules.length - 1);
+  const mod   = track.modules[safeModuleIdx];
   const nodes = nodesOf(mod);
   const cur   = Math.min(progress, nodes.length);
 
