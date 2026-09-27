@@ -507,7 +507,7 @@ function AuthShell({ children }: { children: React.ReactNode }) {
             </div>
             <div>
               <div className="font-display font-extrabold text-white text-lg tracking-tight">Nuru AI Academy</div>
-              <div className="text-white/60 text-[10px] tracking-widest uppercase font-semibold">Tanzania&apos;s AI Learning Hub</div>
+              <div className="text-white/60 text-[10px] tracking-widest uppercase font-semibold">Tanzania&apos;s AI Powered-Building Academy</div>
             </div>
           </div>
 
@@ -605,9 +605,9 @@ function AuthShell({ children }: { children: React.ReactNode }) {
             </div>
 
             {/* Footer */}
-            <p className="text-center text-[11px] text-nuru-muted mt-5 leading-relaxed">
-              🔒 Protected by Supabase Auth · Data encrypted at rest · Tanzania
-            </p>
+            {/* <p className="text-center text-[11px] text-nuru-muted mt-5 leading-relaxed">
+              Data encrypted at rest · Tanzania
+            </p> */}
           </div>
         </div>
       </div>

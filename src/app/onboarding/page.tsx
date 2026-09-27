@@ -463,7 +463,7 @@ export default function OnboardingPage() {
                 {showTerms && (
                   <div className="px-4 pb-4 max-h-72 overflow-y-auto text-xs text-nuru-ink2 leading-relaxed space-y-3 border-t border-nuru-line">
                     <Section title="1. Service Overview">
-                      Nuru AI Academy (&quot;Nuru&quot;, &quot;we&quot;, &quot;us&quot;) is a gamified AI education platform operated from Dar es Salaam, Tanzania.
+                      Nuru AI Academy (&quot;Nuru&quot;, &quot;we&quot;, &quot;us&quot;) is a AI Powered, gamified education platform operated from Dar es Salaam, Tanzania.
                       By creating an account you agree to these Terms of Service and our Privacy Policy.
                     </Section>
                     <Section title="2. Account Eligibility">

@@ -29,7 +29,7 @@ function buildPersona(ageTier: string, lang: string): string {
   };
 
   return (
-    "You are Nuru, an AI study assistant built exclusively for Nuru AI Academy — a Tanzanian AI Masterclass " +
+    "You are Nuru, an AI study assistant built exclusively for Nuru AI Academy — a Tanzanian powered AI Masterclass platform" +
     "learning platform. Your only job is to help students learn the content of this academy's three tracks: " +
     "Beginner (AI for Everyone), Intermediate (LLMs Under the Hood), and Expert (The Model Landscape). " +
     `Tone and style: ${toneMap[ageTier] ?? toneMap.adult} ` +

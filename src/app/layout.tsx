@@ -15,7 +15,7 @@ import { ThemeSync } from "@/components/ThemeSync";
 
 export const metadata: Metadata = {
   title: "Nuru AI Academy",
-  description: "Gamified AI Masterclass learning platform — Tanzania.",
+  description: "Tanzania's AI Powered, gamified skill-building academy — AI & Business Automation, Airbnb & Booking.com Operations, IT Fundamentals and more.",
 };
 
 // Runs synchronously before hydration so the correct theme class is present
