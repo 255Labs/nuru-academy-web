@@ -13,7 +13,7 @@ import { invalidateTrackCache, useTracks } from "@/lib/curriculum-db";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type CmsTab = "tracks" | "modules" | "lessons" | "quizzes" | "challenges" | "videos" | "images" | "certificates";
+type CmsTab = "tracks" | "modules" | "lessons" | "quizzes" | "challenges" | "videos" | "images" | "certificates" | "covers";
 
 interface DbLesson {
   id: string; day: number; title: string; objective: string;
@@ -1235,6 +1235,7 @@ export default function AdminCmsPage() {
     { id: "videos",       label: "Videos",       icon: Video },
     { id: "images",       label: "Images",       icon: ImageIcon },
     { id: "certificates", label: "Certificates", icon: Award },
+    { id: "covers",       label: "Course Covers", icon: ImageIcon },
   ];
 
   return (
@@ -1274,6 +1275,7 @@ export default function AdminCmsPage() {
         {tab === "videos"       && <VideosSection toast={toast} />}
         {tab === "images"       && <ImagesSection toast={toast} />}
         {tab === "certificates" && <CertificatesSection toast={toast} />}
+        {tab === "covers"       && <CourseCoverSection toast={toast} />}
       </div>
     </div>
   );
@@ -1439,6 +1441,215 @@ function ImagesSection({ toast }: { toast: (m: string, e?: boolean) => void }) {
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Section: COURSE COVER IMAGES ─────────────────────────────────────────────
+
+/**
+ * CourseCoverSection — lets admins upload a cover image for each course track.
+ *
+ * Images are stored in the `lesson-images` Supabase bucket under:
+ *   covers/{trackId}/cover.{ext}
+ *
+ * The public URL is then saved to the `tracks` table's `cover_url` column.
+ * ContinueLearning and RecommendedForYou read `cover_url` from the track row
+ * (falls back to the hard-coded Unsplash URLs if not set).
+ *
+ * Admin UX:
+ *   - Shows all 3 tracks in a grid
+ *   - Each card previews the current cover (Unsplash default if none set)
+ *   - "Change Cover" button opens a file picker + upload flow
+ *   - Upload progress bar; success / error toast
+ */
+function CourseCoverSection({ toast }: { toast: (m: string, e?: boolean) => void }) {
+  const { tracks: TRACKS } = useTracks();
+
+  // Fallback covers (same as ContinueLearning.tsx defaults)
+  const FALLBACK: Record<string, string> = {
+    beginner:     "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&q=80&auto=format&fit=crop",
+    intermediate: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&q=80&auto=format&fit=crop",
+    expert:       "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&q=80&auto=format&fit=crop",
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-nuru-card rounded-2xl border border-nuru-line p-5 shadow-card">
+        <h3 className="font-bold text-nuru-ink text-sm mb-1 flex items-center gap-2">
+          <ImageIcon size={14} /> Course Cover Images
+        </h3>
+        <p className="text-xs text-nuru-muted">
+          Upload the hero image shown on each course card in the dashboard and course browser.
+          JPEG, PNG, WebP · Max 10 MB · Recommended 1200 × 630 px (16:9).
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {TRACKS.map((track) => (
+          <CourseCoverCard
+            key={track.id}
+            track={track}
+            fallbackUrl={FALLBACK[track.id] ?? FALLBACK.beginner}
+            toast={toast}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CourseCoverCard({
+  track,
+  fallbackUrl,
+  toast,
+}: {
+  track: { id: string; name: string; subtitle: string; tone: string };
+  fallbackUrl: string;
+  toast: (m: string, e?: boolean) => void;
+}) {
+  const supabase = createClient();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  // Start with the Unsplash default; replaced when we load from DB or after upload
+  const [currentUrl, setCurrentUrl] = useState<string>(fallbackUrl);
+  const [loaded, setLoaded] = useState(false);
+
+  // Load the saved cover_url from the tracks table on mount
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("tracks")
+        .select("cover_url")
+        .eq("id", track.id)
+        .single();
+      if (data?.cover_url) setCurrentUrl(data.cover_url);
+      setLoaded(true);
+    })();
+  }, [track.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleUpload() {
+    const file = fileRef.current?.files?.[0];
+    if (!file) return toast("Please select an image first", true);
+    if (file.size > 10 * 1024 * 1024) return toast("Image must be under 10 MB", true);
+
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+    const path = `covers/${track.id}/cover.${ext}`;
+
+    setUploading(true);
+    setProgress(20);
+
+    // Upload to Supabase storage
+    const { error: upErr } = await supabase.storage
+      .from("lesson-images")
+      .upload(path, file, { upsert: true, contentType: file.type });
+
+    if (upErr) {
+      setUploading(false);
+      return toast(`Upload failed: ${upErr.message}`, true);
+    }
+
+    setProgress(70);
+
+    // Get public URL
+    const { data: urlData } = supabase.storage.from("lesson-images").getPublicUrl(path);
+    const publicUrl = urlData.publicUrl;
+
+    // Save to tracks table
+    const { error: dbErr } = await supabase
+      .from("tracks")
+      .update({ cover_url: publicUrl })
+      .eq("id", track.id);
+
+    setProgress(100);
+    setUploading(false);
+
+    if (dbErr) return toast(`DB update failed: ${dbErr.message}`, true);
+
+    setCurrentUrl(publicUrl + "?t=" + Date.now()); // bust cache
+    if (fileRef.current) fileRef.current.value = "";
+    toast(`Cover updated for ${track.name} ✓`);
+  }
+
+  async function handleRemove() {
+    if (!confirm(`Remove custom cover for "${track.name}"? The default image will be used.`)) return;
+    const { error } = await supabase
+      .from("tracks")
+      .update({ cover_url: null })
+      .eq("id", track.id);
+    if (error) return toast(error.message, true);
+    setCurrentUrl(fallbackUrl);
+    toast("Cover removed — using default image");
+  }
+
+  return (
+    <div className="bg-nuru-card rounded-2xl border border-nuru-line overflow-hidden shadow-card">
+      {/* Cover preview */}
+      <div className="relative w-full h-36 bg-nuru-lav overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={currentUrl}
+          alt={track.name}
+          className="w-full h-full object-cover"
+          onError={(e) => { (e.target as HTMLImageElement).src = fallbackUrl; }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        <span
+          className="absolute top-3 left-3 text-[10px] font-bold tracking-wider uppercase text-white px-2.5 py-1 rounded-full"
+          style={{ background: track.tone + "cc" }}
+        >
+          {track.subtitle}
+        </span>
+        {loaded && currentUrl !== fallbackUrl && (
+          <button
+            onClick={handleRemove}
+            className="absolute top-3 right-3 bg-red-500/80 text-white p-1.5 rounded-lg hover:bg-red-500 transition-colors"
+            title="Remove custom cover"
+          >
+            <Trash2 size={11} />
+          </button>
+        )}
+      </div>
+
+      {/* Body */}
+      <div className="p-4 space-y-3">
+        <div>
+          <div className="font-semibold text-nuru-ink text-sm">{track.name}</div>
+          <div className="text-[11px] text-nuru-muted mt-0.5">
+            {loaded && currentUrl !== fallbackUrl ? "✓ Custom cover set" : "Using default cover"}
+          </div>
+        </div>
+
+        {/* File picker */}
+        <div className="border-2 border-dashed border-nuru-line rounded-xl p-3 hover:border-nuru-purple/40 transition-colors">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="block w-full text-xs text-nuru-muted
+              file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0
+              file:text-xs file:font-bold file:bg-nuru-purple file:text-white file:cursor-pointer"
+          />
+        </div>
+
+        {/* Progress bar */}
+        {uploading && (
+          <div className="h-1.5 rounded-full bg-nuru-lav overflow-hidden">
+            <div
+              className="h-full rounded-full bg-nuru-purple transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
+
+        <Btn
+          label={uploading ? "Uploading…" : "Upload Cover"}
+          icon={uploading ? Loader2 : Upload}
+          onClick={handleUpload}
+          disabled={uploading}
+        />
       </div>
     </div>
   );
