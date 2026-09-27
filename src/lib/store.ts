@@ -439,6 +439,15 @@ export const useGameStore = create<GameState>()(
     }),
     {
       name: "nuru-academy-storage",
+      version: 2,
+      migrate: (persisted: unknown, fromVersion: number) => {
+        const s = persisted as Record<string, unknown>;
+        // v1 → v2: activeModuleIdx changed from a flat number to a per-track object
+        if (fromVersion < 2 && typeof s.activeModuleIdx === "number") {
+          s.activeModuleIdx = { beginner: s.activeModuleIdx, intermediate: 0, expert: 0 };
+        }
+        return s;
+      },
       partialize: (s) => ({
         profile: s.profile,
         theme: s.theme,
