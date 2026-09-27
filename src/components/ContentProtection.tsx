@@ -68,7 +68,7 @@ export function LearnerWatermark() {
   // Only render if we have something to show
   if (!displayName && !email) return null;
 
-  const text = [displayName, email, today].filter(Boolean).join("  ·  ");
+  const text = ["Nuru AI Academy", displayName, email, today].filter(Boolean).join("  ·  ");
   // Repeat the text enough times to fill a rotated 200%×200% div
   const repeats = Array.from({ length: 120 });
 
