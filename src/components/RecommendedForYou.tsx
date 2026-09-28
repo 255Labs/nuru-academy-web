@@ -39,11 +39,14 @@ export function RecommendedForYou() {
     return null;
   }
 
-  // Dynamic tracks (from curriculum DB) that aren't active — filtered to hide
-  // intermediate & expert which are not purchasable yet
+  // Dynamic tracks from curriculum DB shown as locked recommendations.
+  // Exclude: the active track, any already-unlocked track (enrolled/completed),
+  // the beginner track (it's the entry point, not a recommendation), and expert
+  // (not yet purchasable).
   const dynamicRecommended = TRACKS.filter(
     (t) =>
       t.id !== activeTrack &&
+      t.id !== "beginner" &&
       t.id !== "expert" &&
       !isTrackUnlocked(t.id as TrackId, missionsPassed, purchasedTracks)
   );
