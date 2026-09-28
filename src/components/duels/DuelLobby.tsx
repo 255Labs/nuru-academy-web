@@ -20,11 +20,11 @@ export function DuelLobby({
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const track = TRACKS.find((t) => t.id === trackId) ?? TRACKS[0];
+  const track = TRACKS.find((t) => t.id === trackId)!;
 
   async function resolveQuizId(): Promise<string | null> {
     const supabase = createClient();
-    return getQuizIdForModule(supabase, `${trackId}:${WEEK_1_MODULE[trackId]}`);
+    return getQuizIdForModule(supabase, WEEK_1_MODULE[trackId]);
   }
 
   async function handleCreate() {
