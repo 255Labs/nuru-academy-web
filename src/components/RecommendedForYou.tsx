@@ -78,7 +78,7 @@ export function RecommendedForYou() {
             key={c.id}
             aria-disabled="true"
             className="relative rounded-2xl overflow-hidden text-left bg-nuru-card select-none opacity-80"
-            style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.14)", cursor: "not-allowed" }}
+            style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.14)", cursor: "not-allowed", pointerEvents: "none" }}
           >
             {/* Full cover image */}
             <div className="relative w-full overflow-hidden" style={{ height: 220 }}>
@@ -167,7 +167,7 @@ export function RecommendedForYou() {
               key={t.id}
               aria-disabled="true"
               className="relative rounded-2xl overflow-hidden text-left bg-nuru-card select-none opacity-80"
-              style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.14)", cursor: "not-allowed" }}
+              style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.14)", cursor: "not-allowed", pointerEvents: "none" }}
             >
               <div className="relative w-full overflow-hidden" style={{ height: 220 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
