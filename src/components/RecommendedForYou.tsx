@@ -49,11 +49,15 @@ export function RecommendedForYou() {
   // Exclude: the active track, any already-unlocked track (enrolled/completed),
   // the beginner track (it's the entry point, not a recommendation), and expert
   // (not yet purchasable).
+  // Show any non-beginner track that isn't the user's current active track
+  // and hasn't been explicitly purchased. We intentionally do NOT use
+  // isTrackUnlocked here — a track unlocked via course completion should
+  // still appear as a locked recommendation until the user buys it.
   const dynamicRecommended = TRACKS.filter(
     (t) =>
       t.id !== activeTrack &&
       t.id !== "beginner" &&
-      !isTrackUnlocked(t.id as TrackId, missionsPassed, purchasedTracks)
+      !purchasedTracks.includes(t.id)
   );
 
   // Total visible = dynamic + static coming-soon cards
