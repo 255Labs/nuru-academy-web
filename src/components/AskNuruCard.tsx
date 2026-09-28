@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Send, Sparkles, BookOpen, HelpCircle, Zap, Brain } from "lucide-react";
+import { Send, Sparkles, BookOpen, HelpCircle, Zap, Brain, Lock } from "lucide-react";
 import { Nuru, type NuruMood } from "./Nuru";
 import { useT } from "@/lib/i18n";
 
@@ -116,6 +116,17 @@ export function AskNuruCard() {
       style={{
         background: "linear-gradient(160deg, #f9f7ff 0%, #f3f0ff 40%, #fff8e8 100%)",
       }}>
+
+      {/* Lock overlay — entire card is premium / coming soon */}
+      <div className="absolute inset-0 z-20 bg-black/55 backdrop-blur-[2px] rounded-3xl flex flex-col items-center justify-center gap-3 cursor-not-allowed select-none">
+        <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/25 grid place-items-center backdrop-blur-sm">
+          <Lock size={26} className="text-white/90" />
+        </div>
+        <div className="text-center px-4">
+          <div className="font-bold text-white text-sm">Premium Feature</div>
+          <div className="text-white/60 text-xs mt-0.5">Unlock a course to access Nuru AI</div>
+        </div>
+      </div>
 
       {/* Dark mode */}
       <div className="dark:hidden absolute inset-0 pointer-events-none rounded-3xl"
