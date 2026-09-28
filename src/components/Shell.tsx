@@ -10,7 +10,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   useGeoLanguage();
 
   return (
-    <div className="app-bg min-h-screen overflow-x-hidden">
+    <div className="app-bg min-h-screen">
       <HydrateFromServer />
       <ContentProtection />
       <LearnerWatermark />
