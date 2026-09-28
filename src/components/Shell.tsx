@@ -10,12 +10,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
   useGeoLanguage();
 
   return (
-    <div className="app-bg min-h-screen">
-      <HydrateFromServer />
-      <ContentProtection />
-      <LearnerWatermark />
-
-      {/* Sidebar — fixed to viewport left edge, full height, z above content */}
+    <>
+      {/* Sidebar lives OUTSIDE .app-bg so .app-bg > * { position: relative }
+          cannot override its position: fixed */}
       <div
         className="hidden lg:flex fixed top-0 left-0 z-40 h-screen w-[252px] flex-col"
         style={{
@@ -26,13 +23,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <Sidebar />
       </div>
 
-      {/* Main content area — offset right so it clears the fixed sidebar */}
-      <main className="min-h-screen px-4 sm:px-6 lg:px-8 py-5 lg:py-6 pb-24 lg:pb-8 relative z-10 protected-content lg:ml-[252px]">
-        {children}
-      </main>
+      <div className="app-bg min-h-screen lg:ml-[252px]">
+        <HydrateFromServer />
+        <ContentProtection />
+        <LearnerWatermark />
 
-      {/* Mobile bottom nav */}
-      <BottomNav />
-    </div>
+        <main className="min-w-0 px-4 sm:px-6 lg:px-8 py-5 lg:py-6 pb-24 lg:pb-8 relative z-10 protected-content">
+          {children}
+        </main>
+
+        {/* Mobile bottom nav */}
+        <BottomNav />
+      </div>
+    </>
   );
 }
