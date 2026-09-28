@@ -36,6 +36,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
+        {/* Favicon — Nuru robot emoji */}
+        <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🤖</text></svg>' />
         {/* Preload sprite sheet — used immediately by game components */}
         <link rel="preload" href="/nuru/sprites.png" as="image" />
         {/* Mux player web component — loaded async, only activates when MuxVideoPlayer is used */}
