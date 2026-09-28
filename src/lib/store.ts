@@ -474,7 +474,7 @@ export const useGameStore = create<GameState>()(
 export function trackTotalNodes(trackId: TrackId) {
   const track = TRACKS.find((t) => t.id === trackId);
   if (!track) return 0;
-  return track.modules.reduce((a, m) => a + m.lessons.length + (m.quiz ? 1 : 0), 0);
+  return track.modules.reduce((a, m) => a + (m.lessons?.length ?? 0) + (m.quiz ? 1 : 0), 0);
 }
 
 /**
