@@ -118,7 +118,7 @@ export function AskNuruCard() {
       }}>
 
       {/* Lock overlay — entire card is premium / coming soon */}
-      <div className="absolute inset-0 z-20 bg-black/55 backdrop-blur-[2px] rounded-3xl flex flex-col items-center justify-center gap-3 cursor-not-allowed select-none">
+      <div className="absolute inset-0 z-20 bg-black/55 backdrop-blur-[2px] rounded-3xl flex flex-col items-center justify-center gap-3 cursor-not-allowed select-none" style={{ pointerEvents: "all" }}>
         <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/25 grid place-items-center backdrop-blur-sm">
           <Lock size={26} className="text-white/90" />
         </div>
