@@ -404,7 +404,7 @@ export default function OrgsAdminPage() {
             <div className="font-semibold text-white/50 mb-1 flex items-center gap-1.5">
               <Building2 size={11} /> How corporate access works
             </div>
-            After payment is confirmed, an invite link is automatically generated and emailed to the buyer. Employees join by visiting the link, which creates an <code className="bg-white/[0.06] px-1 rounded">org_members</code> record and sets their <code className="bg-white/[0.06] px-1 rounded">access_tier = 'org'</code>. Regenerating a link invalidates the old one — existing members retain access.
+            After payment is confirmed, an invite link is automatically generated and emailed to the buyer. Employees join by visiting the link, which creates an <code className="bg-white/[0.06] px-1 rounded">org_members</code> record and sets their <code className="bg-white/[0.06] px-1 rounded">access_tier = &apos;org&apos;</code>. Regenerating a link invalidates the old one — existing members retain access.
           </div>
         </>
       )}
