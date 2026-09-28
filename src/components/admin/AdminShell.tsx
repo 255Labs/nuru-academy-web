@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, BookOpen, Award, Trophy,
   DollarSign, Globe, UserCheck, Settings, LogOut,
   ChevronLeft, ChevronRight, Sparkles, Bell,
-  ShieldCheck, Menu, X, Monitor,
+  ShieldCheck, Menu, X, Monitor, Tag, Building2,
 } from "lucide-react";
 
 const NAV = [
@@ -32,6 +32,8 @@ const NAV = [
   { group: "Business",
     items: [
       { href: "/nrx-ctrl-9f4a/revenue",      icon: DollarSign,      label: "Revenue"        },
+      { href: "/nrx-ctrl-9f4a/pricing",      icon: Tag,             label: "Pricing"        },
+      { href: "/nrx-ctrl-9f4a/orgs",         icon: Building2,       label: "Organizations"  },
       { href: "/nrx-ctrl-9f4a/analytics",    icon: Globe,           label: "Analytics"      },
     ]
   },
