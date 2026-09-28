@@ -346,7 +346,7 @@ export default function CoursesPage() {
       </Shell>
     );
   }
-  const canOpen  = idx === 0 || missionsPassed[`${activeTrack}:${track.modules[idx - 1]?.id}`] || idx <= activeModuleIdx;
+
   const safeModuleIdx = track.modules.length > 0
     ? Math.min(activeModuleIdx, track.modules.length - 1)
     : 0;
@@ -392,7 +392,7 @@ export default function CoursesPage() {
   function selectModule(idx: number) {
     const advanced = isAdvancedModule(idx);
     const unlocked = isTrackUnlocked(activeTrack, missionsPassed, purchasedTracks);
-    const canOpen  = idx === 0 || missionsPassed[`${activeTrack}:${track.modules[idx - 1].id}`] || idx <= activeModuleIdx;
+    const canOpen  = idx === 0 || missionsPassed[`${activeTrack}:${track.modules[idx - 1]?.id}`] || idx <= activeModuleIdx;
     if (!canOpen) return;
     if (advanced && !unlocked) { setShowPaywall(true); return; }
     setActiveModuleIdx(activeTrack, idx);
@@ -510,11 +510,10 @@ export default function CoursesPage() {
                     </div>
                     <div className="flex gap-2 overflow-x-auto pb-2">
                       {track.modules.map((m, i) => {
-                        const passed   = missionsPassed[`${track.id}:${m.id}`];
-                        const canOpen  = i === 0 || missionsPassed[`${track.id}:${track.modules[i - 1]?.id}`] || i <= activeModuleIdx;
+                        const passed     = missionsPassed[`${track.id}:${m.id}`];
                         const isSelected = i === safeModuleIdx;
-                        const canOpen  = i === 0 || missionsPassed[`${track.id}:${track.modules[i - 1].id}`] || i <= activeModuleIdx;
-                        const isLocked = isAdvancedModule(i) && !isTrackPaid;
+                        const canOpen    = i === 0 || missionsPassed[`${track.id}:${track.modules[i - 1]?.id}`] || i <= activeModuleIdx;
+                        const isLocked   = isAdvancedModule(i) && !isTrackPaid;
                         return (
                           <button
                             key={m.id}
