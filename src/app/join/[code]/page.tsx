@@ -83,7 +83,7 @@ export default function JoinPage() {
           {/* Needs auth */}
           {state.phase === "needs_auth" && (
             <>
-              <h1 className="text-xl font-bold text-nuru-ink">You've been invited!</h1>
+              <h1 className="text-xl font-bold text-nuru-ink">You&apos;ve been invited!</h1>
               <p className="text-sm text-nuru-muted leading-relaxed">
                 Sign in or create a free account to activate your corporate seat on Nuru Academy.
               </p>
@@ -93,7 +93,7 @@ export default function JoinPage() {
                 Sign in to claim your seat
               </button>
               <p className="text-xs text-nuru-muted">
-                Don't have an account? You can create one on the next page — it's free.
+                Don&apos;t have an account? You can create one on the next page — it&apos;s free.
               </p>
             </>
           )}
@@ -110,7 +110,7 @@ export default function JoinPage() {
           {/* Success */}
           {state.phase === "success" && (
             <>
-              <h1 className="text-xl font-bold text-nuru-ink">You're in! 🎉</h1>
+              <h1 className="text-xl font-bold text-nuru-ink">You&apos;re in! 🎉</h1>
               <p className="text-sm text-nuru-muted leading-relaxed">
                 Your seat for <strong className="text-nuru-ink">{state.orgName}</strong> is now active.
                 Full access to all Nuru Academy courses has been unlocked.
@@ -125,7 +125,7 @@ export default function JoinPage() {
           {/* Error */}
           {state.phase === "error" && (
             <>
-              <h1 className="text-xl font-bold text-nuru-ink">Couldn't activate seat</h1>
+              <h1 className="text-xl font-bold text-nuru-ink">Couldn&apos;t activate seat</h1>
               <p className="text-sm text-red-500 leading-relaxed">{state.message}</p>
               <p className="text-xs text-nuru-muted">
                 If you believe this is a mistake, ask your organization admin to check the invite link or contact{" "}
