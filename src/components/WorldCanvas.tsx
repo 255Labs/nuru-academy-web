@@ -35,19 +35,13 @@ export function WorldCanvas() {
   const [dialogue, setDialogue] = useState<{ npc: NPCLine; lineIdx: number } | null>(null);
 
   const activeTrack = useGameStore((s) => s.activeTrack);
-  const activeModuleIdx = useGameStore((s) => {
-    const idx = s.activeModuleIdx;
-    return (typeof idx === "object" && idx !== null)
-      ? ((idx as Record<string, number>)[activeTrack] ?? 0)
-      : 0;
-  });
+  const activeModuleIdx = useGameStore((s) => s.activeModuleIdx[activeTrack]);
   const passMission = useGameStore((s) => s.passMission);
   const addXP = useGameStore((s) => s.addXP);
   const addCoins = useGameStore((s) => s.addCoins);
 
-  const track = TRACKS.find((t) => t.id === activeTrack) ?? TRACKS[0];
-  const safeModuleIdx = track ? Math.min(activeModuleIdx, track.modules.length - 1) : 0;
-  const mod = track?.modules[safeModuleIdx];
+  const track = TRACKS.find((t) => t.id === activeTrack)!;
+  const mod = track.modules[activeModuleIdx];
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -76,7 +70,7 @@ export function WorldCanvas() {
       setEncounterKey(null);
       setFading(false);
       if (passed && pct !== undefined) {
-        if (mod) passMission(activeTrack, mod.id, pct);
+        passMission(activeTrack, mod.id, pct);
         addXP(500);
         addCoins(250);
       }
@@ -140,10 +134,10 @@ export function WorldCanvas() {
         )}
       </div>
 
-      {showModal && mod && mod.quiz && (
+      {showModal && mod.quiz && (
         <MissionQuestModal
           quiz={mod.quiz}
-          moduleId={`${activeTrack}:${mod.id}`}
+          moduleId={mod.id}
           tone={track.tone}
           weekLabel={`Week ${mod.week}`}
           onClose={() => closeBattle(false)}
