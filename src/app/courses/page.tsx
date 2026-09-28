@@ -31,7 +31,7 @@ const TRACK_COVER: Record<string, string> = {
 
 function nodesOf(mod: CourseModule): JourneyNode[] {
   return [
-    ...mod.lessons.map((l) => ({ ...l, kind: "lesson" as const })),
+    ...(mod.lessons ?? []).map((l) => ({ ...l, kind: "lesson" as const })),
     ...(mod.quiz ? [{ kind: "quest" as const, title: "Mission Quest", quest: mod.quiz }] : []),
   ];
 }
