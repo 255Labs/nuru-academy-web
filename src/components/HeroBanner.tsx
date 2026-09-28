@@ -126,7 +126,7 @@ export function HeroBanner() {
         {/* Greeting */}
         <div className="mb-2 mt-6">
           <div className="text-white/70 text-[11px] font-extrabold uppercase tracking-[0.18em] mb-0.5">
-            {timeGreeting} 🌞
+            {timeGreeting}
           </div>
           <h1 className="font-display font-extrabold text-2xl md:text-3xl text-white leading-tight">
             {displayName || "Learner"} 👋
@@ -135,31 +135,30 @@ export function HeroBanner() {
         </div>
 
         {/* Search input */}
-        <form onSubmit={askNuru} className="relative max-w-md mt-3 mb-3">
-          <div className="flex items-center bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl overflow-hidden hover:border-white/40 transition-all focus-within:border-white/50 focus-within:bg-white/20"
+        <form onSubmit={(e) => e.preventDefault()} className="relative max-w-md mt-3 mb-3">
+          <div className="flex items-center bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl overflow-hidden opacity-60 cursor-not-allowed"
             style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.18)" }}>
             <input
               value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              onFocus={() => { setMood("think"); }}
+              readOnly
+              disabled
               placeholder={t("hero.ask_nuru")}
-              className="flex-1 bg-transparent text-white text-[13px] px-4 py-3 outline-none placeholder:text-white/45 font-medium"
+              className="flex-1 bg-transparent text-white text-[13px] px-4 py-3 outline-none placeholder:text-white/35 font-medium cursor-not-allowed"
             />
-            <button type="submit"
-              className="px-4 py-3 text-white/70 hover:text-white transition-colors flex items-center">
+            <div className="px-4 py-3 text-white/30 flex items-center">
               <Send size={15} />
-            </button>
+            </div>
           </div>
         </form>
 
         {/* Quick action chips */}
         <div className="flex gap-2 flex-wrap">
-          {QUICK_ACTIONS.map(({ icon: Icon, labelKey, href }) => (
-            <button key={labelKey} onClick={() => router.push(href)}
-              className="flex items-center gap-1.5 bg-white/12 backdrop-blur-sm hover:bg-white/22 border border-white/20 hover:border-white/38 transition-all rounded-full px-3 py-1.5 text-white text-[11px] font-bold tracking-wide">
-              <Icon size={11} className="opacity-80" />
+          {QUICK_ACTIONS.map(({ icon: Icon, labelKey }) => (
+            <div key={labelKey}
+              className="flex items-center gap-1.5 bg-white/08 backdrop-blur-sm border border-white/12 rounded-full px-3 py-1.5 text-white/45 text-[11px] font-bold tracking-wide cursor-not-allowed select-none opacity-60">
+              <Icon size={11} className="opacity-60" />
               {t(labelKey)}
-            </button>
+            </div>
           ))}
         </div>
       </div>
