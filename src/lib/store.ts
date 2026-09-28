@@ -439,33 +439,32 @@ export const useGameStore = create<GameState>()(
     }),
     {
       name: "nuru-academy-storage",
-      version: 2,
+      // v3: slim partialize to UI-only fields. All game progress (xp, coins,
+      // missionsPassed, studyLog, purchasedTracks, etc.) now comes exclusively
+      // from Supabase on every mount — never from localStorage — so a code
+      // deploy can never wipe live user data by mismatching store shape.
+      version: 3,
       migrate: (persisted: unknown, fromVersion: number) => {
         const s = persisted as Record<string, unknown>;
+        // v1 → v2: activeModuleIdx changed from number to Record<TrackId, number>
         if (fromVersion < 2 && typeof s.activeModuleIdx === "number") {
           s.activeModuleIdx = { beginner: s.activeModuleIdx as number, intermediate: 0, expert: 0 };
         }
+        // v2 → v3: all game-progress fields dropped from localStorage.
+        // Zustand drops keys not in partialize automatically; no action needed.
+        // We just carry forward the UI fields that survived.
         return s;
       },
+      // Only persist true UI preferences — nothing that Supabase owns.
+      // Game progress (xp, coins, missionsPassed, studyLog, purchasedTracks,
+      // quizScores, weeklyStudyMins, allTimeStudyMins, quests) is always
+      // loaded fresh from Supabase by HydrateFromServer on every page mount.
       partialize: (s) => ({
         profile: s.profile,
         theme: s.theme,
         hintsSeen: s.hintsSeen,
-        xp: s.xp,
-        coins: s.coins,
-        gems: s.gems,
-        level: s.level,
         activeTrack: s.activeTrack,
-        activeModuleIdx: s.activeModuleIdx,
-        progress: s.progress,
-        missionsPassed: s.missionsPassed,
-        purchasedTracks: s.purchasedTracks,
-        quizScores: s.quizScores,
-        studyLog: s.studyLog,
-        weeklyStudyMins: s.weeklyStudyMins,
         weeklyGoalMins: s.weeklyGoalMins,
-        allTimeStudyMins: s.allTimeStudyMins,
-        quests: s.quests,
       }),
     }
   )
