@@ -133,6 +133,81 @@ export async function sendStreakReminder({
   }
 }
 
+export interface SendCorporateInviteParams {
+  email: string;
+  username: string;
+  planId: string;
+  amount: number;
+  orderReference: string;
+  inviteUrl: string;
+  currency?: string;
+}
+
+/**
+ * Send a corporate welcome email with the team invite link.
+ * Called from the payment webhook handler after confirming a corporate purchase.
+ * The buyer receives this email and forwards the invite URL to their team.
+ */
+export async function sendCorporateInvite({
+  email,
+  username,
+  planId,
+  amount,
+  orderReference,
+  inviteUrl,
+  currency = "TZS",
+}: SendCorporateInviteParams) {
+  const planLabels: Record<string, string> = {
+    corp_10:     "Corporate — 10 Seats",
+    corp_25:     "Corporate — 25 Seats",
+    corp_custom: "Corporate — Custom",
+  };
+  const planName = planLabels[planId] ?? planId;
+
+  try {
+    const response = await getResend().emails.send({
+      from: "noreply@nuruai.academy",
+      to: email,
+      subject: `Your Nuru Academy team access is ready — ${planName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #6366f1;">Your team access is live! 🎉</h2>
+
+          <p>Hi <strong>${username}</strong>,</p>
+
+          <p>Payment confirmed. Your <strong>${planName}</strong> subscription is active.</p>
+
+          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Plan:</strong> ${planName}</p>
+            <p><strong>Amount paid:</strong> ${amount.toLocaleString()} ${currency}</p>
+            <p><strong>Order ref:</strong> ${orderReference}</p>
+          </div>
+
+          <p><strong>Share this link with your team members:</strong></p>
+
+          <div style="background: #eef2ff; border: 2px solid #6366f1; padding: 16px; border-radius: 8px; margin: 16px 0; word-break: break-all;">
+            <a href="${inviteUrl}" style="color: #4f46e5; font-weight: bold; font-size: 15px;">${inviteUrl}</a>
+          </div>
+
+          <p style="font-size: 13px; color: #666;">
+            Each team member visits this link and signs in (or creates a free Nuru account)
+            to activate their seat. The link can be reused until all seats are filled.
+          </p>
+
+          <p style="font-size: 12px; color: #999; margin-top: 30px;">
+            This is an automated email. Please do not reply to this message.
+          </p>
+        </div>
+      `,
+    });
+
+    return { success: true, messageId: response.data?.id };
+  } catch (error) {
+    console.error("Failed to send corporate invite email:", error);
+    throw error;
+  }
+}
+
 /**
  * Verify that Resend API key is configured.
  * Call this during app initialization to fail fast if email is misconfigured.
