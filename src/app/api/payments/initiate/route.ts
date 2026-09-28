@@ -1,16 +1,27 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { initiateUssdPush } from "@/lib/clickpesa";
-import { rateLimit, rateLimitResponse, PAYMENT_LIMIT } from "@/lib/rateLimit";
 
 /**
- * Starts a real mobile money payment: creates our own pending order
- * (initiate_track_purchase — RLS-scoped to the caller, real price pulled
- * from public.tracks, never trusted from the client), then sends the
- * actual USSD-PUSH prompt to the customer's phone via ClickPesa.
+ * Starts a mobile money payment for a plan (individual, corporate, or
+ * the launch-discount price if still available).
  *
- * The webhook route (src/app/api/payments/webhook/route.ts) is what
- * actually confirms the payment succeeded — this route only *starts* it.
+ * Body: {
+ *   planId:      string          — references public.plans.id
+ *   phoneNumber: string          — customer's TZ mobile number
+ *   orgName?:    string          — required for corporate plans
+ *   orgDomain?:  string          — optional email domain for corp org
+ * }
+ *
+ * Flow:
+ *   1. Authenticate user
+ *   2. Call initiate_plan_purchase RPC (server-side price lookup, discount
+ *      seat lock via FOR UPDATE, org row creation if corporate)
+ *   3. Send USSD-push prompt via ClickPesa
+ *   4. On push failure, mark the pending row as 'failed' for clean reconciliation
+ *
+ * The webhook route (src/app/api/payments/webhook/route.ts) confirms
+ * the payment once ClickPesa calls back.
  */
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -22,17 +33,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const { trackId, phoneNumber } = (await request.json()) as { trackId?: string; phoneNumber?: string };
+  const body = (await request.json()) as {
+    planId?: string;
+    phoneNumber?: string;
+    orgName?: string;
+    orgDomain?: string;
+  };
 
-  if (!trackId || !phoneNumber) {
-    return NextResponse.json({ error: "trackId and phoneNumber are required" }, { status: 400 });
+  const { planId, phoneNumber, orgName, orgDomain } = body;
+
+  if (!planId || !phoneNumber) {
+    return NextResponse.json({ error: "planId and phoneNumber are required" }, { status: 400 });
   }
 
-  // Basic sanity check — ClickPesa expects international format without a
-  // leading "+", e.g. 255712345678. Real validation of Tanzanian mobile
-  // prefixes is intentionally left to ClickPesa's own API, which will
-  // reject an unsupported number with a clear error rather than silently
-  // failing — no need to duplicate that logic here.
+  // Normalize TZ phone number to international format (255XXXXXXXXX)
+  // Real prefix validation is left to ClickPesa — it rejects bad numbers
+  // with a clear error rather than silently failing.
   const normalizedPhone = phoneNumber.replace(/[^\d]/g, "");
   if (normalizedPhone.length < 9) {
     return NextResponse.json({ error: "Enter a valid phone number, e.g. 0712345678" }, { status: 400 });
@@ -41,13 +57,23 @@ export async function POST(request: Request) {
     ? normalizedPhone
     : `255${normalizedPhone.replace(/^0/, "")}`;
 
-  const { data: initResult, error: initError } = await supabase.rpc("initiate_track_purchase", {
-    p_track_id: trackId,
+  // Call the DB RPC — this:
+  //   • looks up the real price (or discount price if still available)
+  //   • atomically decrements discount seats if applicable (FOR UPDATE lock)
+  //   • creates an org row if the plan is corporate
+  //   • inserts a 'pending' track_purchases row
+  const { data: initResult, error: initError } = await supabase.rpc("initiate_plan_purchase", {
+    p_plan_id:     planId,
     p_phone_number: internationalPhone,
+    p_org_name:    orgName  ?? null,
+    p_org_domain:  orgDomain ?? null,
   });
 
   if (initError || !initResult) {
-    return NextResponse.json({ error: initError?.message ?? "Could not start the order" }, { status: 400 });
+    return NextResponse.json(
+      { error: initError?.message ?? "Could not start the order" },
+      { status: 400 }
+    );
   }
 
   const { order_reference: orderReference, amount_tzs: amountTZS } = initResult as unknown as {
@@ -55,6 +81,7 @@ export async function POST(request: Request) {
     amount_tzs: number;
   };
 
+  // Send the actual USSD-push to the customer's phone via ClickPesa
   try {
     const pushResult = await initiateUssdPush({
       amountTZS,
@@ -64,14 +91,14 @@ export async function POST(request: Request) {
     return NextResponse.json({
       orderReference,
       amountTZS,
-      status: pushResult.status,
+      status:  pushResult.status,
       channel: pushResult.channel,
     });
   } catch (err) {
-    console.error("ClickPesa initiate-ussd-push-request failed", err);
-    // The USSD push itself failed — mark the pending row as failed so it
-    // doesn't linger as 'pending' forever and pollute reconciliation queries.
-    // (Lesson from Tendai POS: record first, push second, clean up on push failure.)
+    console.error("ClickPesa initiate-ussd-push failed", err);
+
+    // Mark the pending row as failed so it doesn't linger in reconciliation.
+    // (Pattern from Tendai POS: record first, push second, clean up on failure.)
     try {
       const { createAdminClient } = await import("@/lib/supabase/admin");
       const admin = createAdminClient();
@@ -83,6 +110,7 @@ export async function POST(request: Request) {
     } catch (cleanupErr) {
       console.error("Failed to mark pending payment as failed after push error:", cleanupErr);
     }
+
     return NextResponse.json(
       { error: "Couldn't reach the payment provider. Please try again in a moment." },
       { status: 502 }
