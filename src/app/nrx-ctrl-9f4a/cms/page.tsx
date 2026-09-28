@@ -294,7 +294,7 @@ function ModulesSection({ toast }: { toast: (m: string, e?: boolean) => void }) 
             style={{ background: track.tone }}>W{m.week}</div>
           <div className="flex-1">
             <div className="font-bold text-nuru-ink text-sm">{m.name}</div>
-            <div className="text-xs text-nuru-muted mt-0.5">{m.tagline} · {m.lessons.length} lessons · ID: {m.id}</div>
+            <div className="text-xs text-nuru-muted mt-0.5">{m.tagline} · {m.lessons?.length ?? 0} lessons · ID: {m.id}</div>
           </div>
           <div className="flex gap-1.5">
             <Btn label="Edit" icon={Edit3} variant="outline" small
