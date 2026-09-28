@@ -157,6 +157,14 @@ function TracksSection({ toast }: { toast: (m: string, e?: boolean) => void }) {
       hero_image: "", is_published: true });
   }
 
+  async function deleteTrack(id: string, name: string) {
+    if (!confirm(`Delete track "${name}" and ALL its modules and lessons? This cannot be undone.`)) return;
+    const s = createClient();
+    const { error } = await s.rpc("admin_delete_track", { p_track_id: id });
+    if (error) return toast(error.message, true);
+    toast("Track deleted"); invalidateTrackCache();
+  }
+
   async function save() {
     if (!form?.id || !form.name) return;
     setBusy(true);
@@ -191,7 +199,10 @@ function TracksSection({ toast }: { toast: (m: string, e?: boolean) => void }) {
             <div className="text-xs text-nuru-muted mt-0.5">{t.subtitle} · TZS {t.priceTZS} · Pass at {t.passingPct}%</div>
             <div className="text-xs text-nuru-muted mt-0.5">{t.tagline}</div>
           </div>
-          <Btn label="Edit" icon={Edit3} variant="outline" small onClick={() => editTrack(t)} />
+          <div className="flex gap-1.5">
+            <Btn label="Edit" icon={Edit3} variant="outline" small onClick={() => editTrack(t)} />
+            <Btn label="Delete" icon={Trash2} variant="danger" small onClick={() => deleteTrack(t.id, t.name)} />
+          </div>
         </div>
       ))}
 
