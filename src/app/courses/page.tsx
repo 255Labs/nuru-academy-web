@@ -346,6 +346,7 @@ export default function CoursesPage() {
       </Shell>
     );
   }
+  const canOpen  = idx === 0 || missionsPassed[`${activeTrack}:${track.modules[idx - 1]?.id}`] || idx <= activeModuleIdx;
   const safeModuleIdx = track.modules.length > 0
     ? Math.min(activeModuleIdx, track.modules.length - 1)
     : 0;
@@ -510,6 +511,7 @@ export default function CoursesPage() {
                     <div className="flex gap-2 overflow-x-auto pb-2">
                       {track.modules.map((m, i) => {
                         const passed   = missionsPassed[`${track.id}:${m.id}`];
+                        const canOpen  = i === 0 || missionsPassed[`${track.id}:${track.modules[i - 1]?.id}`] || i <= activeModuleIdx;
                         const isSelected = i === safeModuleIdx;
                         const canOpen  = i === 0 || missionsPassed[`${track.id}:${track.modules[i - 1].id}`] || i <= activeModuleIdx;
                         const isLocked = isAdvancedModule(i) && !isTrackPaid;
