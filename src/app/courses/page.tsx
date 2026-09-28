@@ -346,7 +346,6 @@ export default function CoursesPage() {
       </Shell>
     );
   }
-
   const safeModuleIdx = track.modules.length > 0
     ? Math.min(activeModuleIdx, track.modules.length - 1)
     : 0;
@@ -510,10 +509,10 @@ export default function CoursesPage() {
                     </div>
                     <div className="flex gap-2 overflow-x-auto pb-2">
                       {track.modules.map((m, i) => {
-                        const passed     = missionsPassed[`${track.id}:${m.id}`];
+                        const passed   = missionsPassed[`${track.id}:${m.id}`];
                         const isSelected = i === safeModuleIdx;
-                        const canOpen    = i === 0 || missionsPassed[`${track.id}:${track.modules[i - 1]?.id}`] || i <= activeModuleIdx;
-                        const isLocked   = isAdvancedModule(i) && !isTrackPaid;
+                        const canOpen  = i === 0 || missionsPassed[`${track.id}:${track.modules[i - 1]?.id}`] || i <= activeModuleIdx;
+                        const isLocked = isAdvancedModule(i) && !isTrackPaid;
                         return (
                           <button
                             key={m.id}
@@ -760,7 +759,7 @@ export default function CoursesPage() {
       {questOpen && mod.quiz && (
         <MissionQuestModal
           quiz={mod.quiz}
-          moduleId={`${activeTrack}:${mod.id}`}
+          moduleId={mod.id}
           tone={track.tone}
           weekLabel={`Week ${mod.week}`}
           onClose={() => setQuestOpen(false)}
