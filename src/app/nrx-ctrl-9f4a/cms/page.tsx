@@ -245,11 +245,11 @@ function TracksSection({ toast }: { toast: (m: string, e?: boolean) => void }) {
 
 function ModulesSection({ toast }: { toast: (m: string, e?: boolean) => void }) {
   const { tracks: TRACKS } = useTracks();
-  const [selected, setSelected] = useState(TRACKS[0].id);
+  const [selected, setSelected] = useState(TRACKS[0]?.id ?? "");
   const [form, setForm] = useState<{
     id: string; track_id: string; week: string; name: string; tagline: string; description: string;
   } | null>(null);
-  const track = TRACKS.find((t) => t.id === selected)!;
+  const track = TRACKS.find((t) => t.id === selected);
   const blank = () => ({ id: "", track_id: selected, week: "1", name: "", tagline: "", description: "" });
 
   async function save() {
@@ -273,6 +273,8 @@ function ModulesSection({ toast }: { toast: (m: string, e?: boolean) => void }) 
 
   const f = form;
   const set = (k: keyof NonNullable<typeof f>, v: string) => setForm((p) => p ? { ...p, [k]: v } : p);
+
+  if (!track) return null;
 
   return (
     <div className="space-y-4">
@@ -336,8 +338,8 @@ function ModulesSection({ toast }: { toast: (m: string, e?: boolean) => void }) 
 
 function LessonsSection({ toast }: { toast: (m: string, e?: boolean) => void }) {
   const { tracks: TRACKS } = useTracks();
-  const [trackId, setTrackId] = useState(TRACKS[0].id);
-  const [moduleId, setModuleId] = useState(TRACKS[0].modules[0].id);
+  const [trackId, setTrackId] = useState(TRACKS[0]?.id ?? "");
+  const [moduleId, setModuleId] = useState(TRACKS[0]?.modules?.[0]?.id ?? "");
   const [lessons, setLessons] = useState<DbLesson[]>([]);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<{
@@ -346,9 +348,10 @@ function LessonsSection({ toast }: { toast: (m: string, e?: boolean) => void }) 
     demo: string; homework: string; notes: string; video_title: string;
   } | null>(null);
 
-  const track = TRACKS.find((t) => t.id === trackId)!;
+  const track = TRACKS.find((t) => t.id === trackId);
 
   const loadLessons = useCallback(async () => {
+    if (!moduleId) return;
     setLoading(true);
     const { data } = await createClient().rpc("admin_list_lessons", { p_module_id: moduleId });
     setLessons((data ?? []) as DbLesson[]);
@@ -396,6 +399,8 @@ function LessonsSection({ toast }: { toast: (m: string, e?: boolean) => void }) 
 
   const f = form;
   const set = (k: keyof NonNullable<typeof f>, v: string) => setForm((p) => p ? { ...p, [k]: v } : p);
+
+  if (!TRACKS.length) return null;
 
   return (
     <div className="space-y-4">
@@ -512,8 +517,8 @@ function LessonsSection({ toast }: { toast: (m: string, e?: boolean) => void }) 
 
 function QuizzesSection({ toast }: { toast: (m: string, e?: boolean) => void }) {
   const { tracks: TRACKS } = useTracks();
-  const [trackId, setTrackId] = useState(TRACKS[0].id);
-  const [moduleId, setModuleId] = useState(TRACKS[0].modules[0].id);
+  const [trackId, setTrackId] = useState(TRACKS[0]?.id ?? "");
+  const [moduleId, setModuleId] = useState(TRACKS[0]?.modules?.[0]?.id ?? "");
   const [quiz, setQuiz] = useState<DbQuiz | null>(null);
   const [loading, setLoading] = useState(false);
   const [quizForm, setQuizForm] = useState<{ title: string; subtitle: string; minutes: string; passing_pct: string; is_placeholder: boolean } | null>(null);
@@ -523,9 +528,10 @@ function QuizzesSection({ toast }: { toast: (m: string, e?: boolean) => void }) 
     correct: string; accept: string; explain: string;
   } | null>(null);
 
-  const track = TRACKS.find((t) => t.id === trackId)!;
+  const track = TRACKS.find((t) => t.id === trackId);
 
   const loadQuiz = useCallback(async () => {
+    if (!moduleId) return;
     setLoading(true);
     const { data } = await createClient().rpc("admin_get_quiz", { p_module_id: moduleId });
     setQuiz(data as DbQuiz | null);
@@ -582,6 +588,8 @@ function QuizzesSection({ toast }: { toast: (m: string, e?: boolean) => void }) 
 
   const qf = qForm;
   const setQ = (k: keyof NonNullable<typeof qf>, v: string | boolean) => setQForm((p) => p ? { ...p, [k]: v } : p);
+
+  if (!TRACKS.length) return null;
 
   return (
     <div className="space-y-4">
@@ -739,8 +747,8 @@ function QuizzesSection({ toast }: { toast: (m: string, e?: boolean) => void }) 
 
 function ChallengesSection({ toast }: { toast: (m: string, e?: boolean) => void }) {
   const { tracks: TRACKS } = useTracks();
-  const [trackId, setTrackId] = useState(TRACKS[0].id);
-  const [moduleId, setModuleId] = useState(TRACKS[0].modules[0].id);
+  const [trackId, setTrackId] = useState(TRACKS[0]?.id ?? "");
+  const [moduleId, setModuleId] = useState(TRACKS[0]?.modules?.[0]?.id ?? "");
   const [lessons, setLessons] = useState<DbLesson[]>([]);
   const [selected, setSelected] = useState<DbLesson | null>(null);
   const [challenge, setChallenge] = useState<DbChallenge | null>(null);
@@ -750,9 +758,10 @@ function ChallengesSection({ toast }: { toast: (m: string, e?: boolean) => void 
     correct: string; accept: string; hint: string; xp_reward: string;
   } | null>(null);
 
-  const track = TRACKS.find((t) => t.id === trackId)!;
+  const track = TRACKS.find((t) => t.id === trackId);
 
   useEffect(() => {
+    if (!moduleId) return;
     createClient().rpc("admin_list_lessons", { p_module_id: moduleId })
       .then(({ data }) => { setLessons((data ?? []) as DbLesson[]); setSelected(null); setChallenge(null); });
   }, [moduleId]);
@@ -793,6 +802,8 @@ function ChallengesSection({ toast }: { toast: (m: string, e?: boolean) => void 
 
   const f = form;
   const set = (k: keyof NonNullable<typeof f>, v: string) => setForm((p) => p ? { ...p, [k]: v } : p);
+
+  if (!TRACKS.length) return null;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4">
@@ -904,7 +915,7 @@ function VideosSection({ toast }: { toast: (m: string, e?: boolean) => void }) {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [module, setModule] = useState(() => TRACKS[0]?.modules[0]?.id ?? "");
+  const [module, setModule] = useState(() => TRACKS[0]?.modules?.[0]?.id ?? "");
   const [day, setDay] = useState("1");
   const [title, setTitle] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
@@ -1297,7 +1308,7 @@ export default function AdminCmsPage() {
 function ImagesSection({ toast }: { toast: (m: string, e?: boolean) => void }) {
   const { tracks: TRACKS } = useTracks();
   const [trackId, setTrackId] = useState(TRACKS[0]?.id ?? "beginner");
-  const [moduleId, setModuleId] = useState(TRACKS[0]?.modules[0]?.id ?? "");
+  const [moduleId, setModuleId] = useState(TRACKS[0]?.modules?.[0]?.id ?? "");
   const [lessonId, setLessonId] = useState<string | null>(null);
   const [lessons, setLessons] = useState<DbLesson[]>([]);
   const [images, setImages] = useState<{ id: string; url: string; caption: string | null; sort_order: number }[]>([]);
@@ -1305,7 +1316,7 @@ function ImagesSection({ toast }: { toast: (m: string, e?: boolean) => void }) {
   const [progress, setProgress] = useState(0);
   const [caption, setCaption] = useState("");
   const imgRef = useRef<HTMLInputElement>(null);
-  const track = TRACKS.find((t) => t.id === trackId)!;
+  const track = TRACKS.find((t) => t.id === trackId);
 
   useEffect(() => {
     if (!moduleId) return;
@@ -1361,6 +1372,8 @@ function ImagesSection({ toast }: { toast: (m: string, e?: boolean) => void }) {
     setImages((i) => i.filter((x) => x.id !== imgId));
     toast("Image deleted");
   }
+
+  if (!TRACKS.length) return null;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-4">
