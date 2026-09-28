@@ -32,25 +32,14 @@ const COMING_SOON_COURSES = [
 export function RecommendedForYou() {
   const activeTrack = useGameStore((s) => s.activeTrack);
   const purchasedTracks = useGameStore((s) => s.purchasedTracks);
-  const storeHydrated = useGameStore((s) => s.hydrated);
 
-  // Wait for the store to hydrate and activeTrack to be set before rendering
-  if (!storeHydrated || !activeTrack) {
-    return null;
-  }
-
-  // Dynamic tracks from curriculum DB shown as locked recommendations.
-  // Exclude: the active track, any already-unlocked track (enrolled/completed),
-  // the beginner track (it's the entry point, not a recommendation), and expert
-  // (not yet purchasable).
-  // Show any non-beginner track that isn't the user's current active track
-  // and hasn't been explicitly purchased. We intentionally do NOT use
-  // isTrackUnlocked here — a track unlocked via course completion should
-  // still appear as a locked recommendation until the user buys it.
+  // Show all non-beginner tracks that aren't the user's active track
+  // and haven't been purchased. STATIC_TRACKS is always available —
+  // no DB gating needed here.
   const dynamicRecommended = TRACKS.filter(
     (t) =>
-      t.id !== activeTrack &&
       t.id !== "beginner" &&
+      t.id !== activeTrack &&
       !purchasedTracks.includes(t.id)
   );
 
