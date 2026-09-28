@@ -1,8 +1,8 @@
 "use client";
 
 import { Lock, Clock } from "lucide-react";
-import { useGameStore, isTrackUnlocked } from "@/lib/store";
-import { useTracks } from "@/lib/curriculum-db";
+import { useGameStore } from "@/lib/store";
+import { TRACKS } from "@/data/curriculum";
 import type { TrackId } from "@/lib/store";
 
 /**
@@ -30,18 +30,12 @@ const COMING_SOON_COURSES = [
 ];
 
 export function RecommendedForYou() {
-  const { tracks: TRACKS, loading: tracksLoading } = useTracks();
   const activeTrack = useGameStore((s) => s.activeTrack);
-  const missionsPassed = useGameStore((s) => s.missionsPassed);
   const purchasedTracks = useGameStore((s) => s.purchasedTracks);
   const storeHydrated = useGameStore((s) => s.hydrated);
 
-  // Wait for both the store (missionsPassed/purchasedTracks/activeTrack) and
-  // the DB track list to settle before rendering — prevents the flash where
-  // pre-hydration empty state makes locked tracks appear then vanish.
-  // activeTrack must be a non-empty string; if it's still "" or undefined the
-  // filter below will incorrectly include the user's own enrolled track.
-  if (!storeHydrated || !activeTrack || tracksLoading || !TRACKS || TRACKS.length === 0 || TRACKS.some((tr) => !tr)) {
+  // Wait for the store to hydrate and activeTrack to be set before rendering
+  if (!storeHydrated || !activeTrack) {
     return null;
   }
 
