@@ -53,7 +53,6 @@ export function RecommendedForYou() {
     (t) =>
       t.id !== activeTrack &&
       t.id !== "beginner" &&
-      t.id !== "expert" &&
       !isTrackUnlocked(t.id as TrackId, missionsPassed, purchasedTracks)
   );
 
@@ -206,7 +205,7 @@ export function RecommendedForYou() {
                     <Lock size={20} className="text-white/80" />
                   </div>
                   <span className="text-white font-bold text-sm tracking-wide px-4 py-1 rounded-full bg-black/40 backdrop-blur-sm border border-white/20">
-                    Coming Soon
+                    Unlock to Access
                   </span>
                 </div>
 
@@ -226,7 +225,7 @@ export function RecommendedForYou() {
                 style={{ background: t.tone + "12" }}
               >
                 <span className="text-[12px] text-nuru-muted font-medium">
-                  {t.modules.length} modules · Launching soon
+                  {t.modules.length} modules · {t.priceTZS ? `TZS ${t.priceTZS}` : "Coming soon"}
                 </span>
                 <div
                   className="flex items-center gap-1.5 text-[12px] font-bold px-3 py-1.5 rounded-full opacity-40"
