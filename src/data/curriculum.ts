@@ -794,7 +794,7 @@ export const EXPERT_MODULES: CourseModule[] = [
 export const TRACKS: Track[] = [
   { id: "beginner", name: "AI for Everyone", subtitle: "Beginner Track",
     tagline: "Start here. Real skills, plain language, Tanzanian examples.",
-    priceTZS: "70,000", passingPct: 60,
+    priceTZS: "29,000", passingPct: 60,
     tone: "#3B82F6", toneDeep: "#2563EB", cardGradient: ["#4F8EF7", "#2563EB"],
     modules: BEGINNER_MODULES, enrolled: true },
   { id: "intermediate", name: "LLMs Under the Hood", subtitle: "Intermediate Track",
