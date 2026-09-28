@@ -4,7 +4,7 @@ import {
   normalizeClickPesaWebhook,
   logWebhookSignatureDiagnostic,
 } from "@/lib/clickpesa";
-import { sendPaymentReceipt } from "@/lib/email";
+import { sendPaymentReceipt, sendCorporateInvite } from "@/lib/email";
 
 /**
  * ClickPesa payment webhook.
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       // pending row with the right amount before confirming anything.
       const { data: pendingRow } = await admin
         .from("track_purchases")
-        .select("id, amount_tzs, status")
+        .select("id, amount_tzs, status, plan_id, plan_type")
         .eq("order_reference", orderReference)
         .maybeSingle();
 
@@ -124,21 +124,22 @@ export async function POST(request: NextRequest) {
           processError = `Amount mismatch: received ${receivedAmount}, expected ${expectedAmount}`;
           console.error(processError, { orderReference });
         } else {
-          const { error } = await admin.rpc("confirm_track_purchase", {
-            p_order_reference: orderReference,
-            p_status: "success",
-            p_clickpesa_payment_id: paymentReference,
+          // confirm_plan_purchase: updates access_tier, creates org_invite for corporate
+          const { data: confirmResult, error } = await admin.rpc("confirm_plan_purchase", {
+            p_order_reference:        orderReference,
+            p_status:                 "success",
+            p_clickpesa_payment_id:   paymentReference,
           });
 
           if (error) {
             processError = error.message;
-            console.error("confirm_track_purchase (success) failed", error, orderReference);
+            console.error("confirm_plan_purchase (success) failed", error, orderReference);
           } else {
-            // Fix #18: send payment receipt email — non-blocking
+            // Send email — non-blocking
             try {
               const { data: purchase } = await admin
                 .from("track_purchases")
-                .select("user_id, track_id, amount_tzs, order_reference")
+                .select("user_id, plan_id, plan_type, amount_tzs, order_reference")
                 .eq("order_reference", orderReference)
                 .single();
 
@@ -150,35 +151,49 @@ export async function POST(request: NextRequest) {
                   .single();
 
                 if (profile?.email) {
-                  const trackNames: Record<string, string> = {
-                    beginner: "AI for Everyone",
-                    intermediate: "LLMs Under the Hood",
-                    expert: "The Model Landscape",
-                  };
-                  await sendPaymentReceipt({
-                    email: profile.email,
-                    username: profile.username ?? "Learner",
-                    trackName: trackNames[purchase.track_id] ?? purchase.track_id,
-                    amount: purchase.amount_tzs,
-                    orderReference: purchase.order_reference,
-                  });
+                  if (purchase.plan_type === "corporate") {
+                    // For corporate plans, send the invite link for their team
+                    const result = confirmResult as { invite_code?: string } | null;
+                    const inviteCode = result?.invite_code;
+                    const inviteUrl  = inviteCode
+                      ? `${process.env.NEXT_PUBLIC_APP_URL ?? "https://nuruacademy.co"}/join/${inviteCode}`
+                      : null;
+
+                    await sendCorporateInvite({
+                      email:          profile.email,
+                      username:       profile.username ?? "Team Admin",
+                      planId:         purchase.plan_id,
+                      amount:         purchase.amount_tzs,
+                      orderReference: purchase.order_reference,
+                      inviteUrl:      inviteUrl ?? "",
+                    });
+                  } else {
+                    // Individual plan — send standard receipt
+                    await sendPaymentReceipt({
+                      email:          profile.email,
+                      username:       profile.username ?? "Learner",
+                      trackName:      "Nuru Academy Full Access",
+                      amount:         purchase.amount_tzs,
+                      orderReference: purchase.order_reference,
+                    });
+                  }
                 }
               }
             } catch (emailErr) {
-              console.error("Receipt email failed (non-fatal):", emailErr);
+              console.error("Post-payment email failed (non-fatal):", emailErr);
             }
           }
         }
       }
     } else if (status === "FAILED") {
-      const { error } = await admin.rpc("confirm_track_purchase", {
-        p_order_reference: orderReference,
-        p_status: "failed",
+      const { error } = await admin.rpc("confirm_plan_purchase", {
+        p_order_reference:      orderReference,
+        p_status:               "failed",
         p_clickpesa_payment_id: paymentReference,
       });
       if (error) {
         processError = error.message;
-        console.error("confirm_track_purchase (failed) failed", error, orderReference);
+        console.error("confirm_plan_purchase (failed) failed", error, orderReference);
       }
     } else {
       // PROCESSING / UNKNOWN — nothing to do yet
