@@ -346,8 +346,16 @@ export default function CoursesPage() {
       </Shell>
     );
   }
-  const safeModuleIdx = Math.min(activeModuleIdx, track.modules.length - 1);
+  const safeModuleIdx = track.modules.length > 0
+    ? Math.min(activeModuleIdx, track.modules.length - 1)
+    : 0;
   const mod   = track.modules[safeModuleIdx];
+  if (!mod) return (
+    <Shell>
+      <TopBar title="My Courses" subtitle="No modules yet" />
+      <div className="flex items-center justify-center py-20 text-nuru-muted text-sm">No modules available yet.</div>
+    </Shell>
+  );
   const nodes = nodesOf(mod);
   const cur   = Math.min(progress, nodes.length);
 
