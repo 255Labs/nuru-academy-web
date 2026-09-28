@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 
 const LANGS = Object.entries(LANG_META) as [DisplayLang, typeof LANG_META[DisplayLang]][];
 
-export function LanguageToggle({ compact = false }: { compact?: boolean }) {
+export function LanguageToggle({ compact = false, dropDirection = "up" }: { compact?: boolean; dropDirection?: "up" | "down" }) {
   const displayLang = useGameStore((s) => s.profile.displayLang ?? "en");
   const updateProfile = useGameStore((s) => s.updateProfile);
 
@@ -26,7 +26,7 @@ export function LanguageToggle({ compact = false }: { compact?: boolean }) {
           <span>{LANG_META[displayLang]?.flag ?? "🌍"}</span>
           <span className="uppercase">{displayLang}</span>
         </button>
-        <div className="absolute bottom-full left-0 mb-1 hidden group-hover:flex flex-col gap-0.5 bg-nuru-card border border-nuru-line rounded-xl shadow-pop p-2 z-50 min-w-[160px]">
+        <div className={`absolute ${dropDirection === "down" ? "top-full right-0 mt-1" : "bottom-full left-0 mb-1"} hidden group-hover:flex flex-col gap-0.5 bg-nuru-card border border-nuru-line rounded-xl shadow-pop p-2 z-50 min-w-[160px]`}>
           {LANGS.map(([code, meta]) => (
             <button
               key={code}
