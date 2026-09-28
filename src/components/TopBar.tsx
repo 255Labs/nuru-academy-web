@@ -107,9 +107,23 @@ export function TopBar({
   return (
     <div className="relative sticky top-0 z-20 -mx-5 lg:-mx-8 px-5 lg:px-8 py-3.5 mb-6 border-b border-nuru-line/60 flex items-start justify-between flex-wrap gap-4"
       style={{ background: "rgb(var(--c-bg) / 0.88)", backdropFilter: "blur(16px)" }}>
-      {/* Gradient accent line at top */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] pointer-events-none"
-        style={{ background: "linear-gradient(90deg, #6B4EFF 0%, #F5B942 50%, #22C55E 100%)", opacity: 0.6 }} />
+      {/* Neon scrolling accent line */}
+      <div className="absolute top-0 left-0 right-0 h-[3px] pointer-events-none overflow-hidden">
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(90deg, #7C3AFF, #FF2CF1, #00F0FF, #FFEA00, #00FF94, #FF6B00, #7C3AFF, #FF2CF1, #00F0FF, #FFEA00, #00FF94, #FF6B00, #7C3AFF)",
+          backgroundSize: "200% 100%",
+          animation: "neon-scroll 3s linear infinite",
+          filter: "blur(0.5px) brightness(1.4)",
+          boxShadow: "0 0 8px 2px rgba(124,58,255,0.7), 0 0 16px 4px rgba(255,44,241,0.4)",
+        }} />
+        <style>{`
+          @keyframes neon-scroll {
+            0%   { background-position: 0% 0; }
+            100% { background-position: -100% 0; }
+          }
+        `}</style>
+      </div>
 
       {heading ? (
         <div>
