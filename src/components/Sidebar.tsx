@@ -4,11 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home, BookOpen, Swords, Trophy, Settings,
-  Award, Zap, Sparkles, ChevronRight, Flame,
+  Award, ChevronRight, Flame, Bot,
 } from "lucide-react";
 import { useGameStore } from "@/lib/store";
 import { NuruProCard } from "./NuruProCard";
-import { LanguageToggle } from "./LanguageToggle";
 import { useT } from "@/lib/i18n";
 
 const NAV = [
@@ -42,9 +41,9 @@ export function Sidebar() {
       <div className="px-5 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
         <div className="flex items-center gap-3">
           <div className="relative w-10 h-10 shrink-0">
-            <div className="w-10 h-10 rounded-2xl grid place-items-center shadow-pop"
+            <div className="w-10 h-10 rounded-2xl grid place-items-center shadow-pop overflow-hidden"
               style={{ background: "linear-gradient(135deg, #7C5CFF 0%, #3E2A9E 100%)" }}>
-              <Sparkles size={18} className="text-white" />
+              <Bot size={22} className="text-white" strokeWidth={1.8} />
             </div>
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2 border-white/10" />
           </div>
@@ -52,7 +51,6 @@ export function Sidebar() {
             <div className="font-display font-extrabold text-base text-white leading-none tracking-tight">NURU</div>
             <div className="text-[9px] font-bold tracking-[0.2em] text-white/45 mt-0.5 uppercase">Learning Hub</div>
           </div>
-          <LanguageToggle compact />
         </div>
 
         {/* User mini-card */}
