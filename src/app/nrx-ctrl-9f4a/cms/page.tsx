@@ -408,7 +408,7 @@ function LessonsSection({ toast }: { toast: (m: string, e?: boolean) => void }) 
       <div className="bg-nuru-card rounded-2xl border border-nuru-line p-4 flex flex-wrap gap-3 items-center">
         <div className="flex gap-2 flex-wrap">
           {TRACKS.map((t) => (
-            <button key={t.id} onClick={() => { setTrackId(t.id); setModuleId(t.modules[0].id); }}
+            <button key={t.id} onClick={() => { setTrackId(t.id); setModuleId(t.modules[0]?.id ?? ""); }}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${trackId === t.id ? "text-white shadow-pop" : "bg-nuru-lav text-nuru-ink2"}`}
               style={trackId === t.id ? { background: t.tone } : undefined}>
               {t.subtitle}
@@ -417,7 +417,7 @@ function LessonsSection({ toast }: { toast: (m: string, e?: boolean) => void }) 
         </div>
         <ChevronRight size={14} className="text-nuru-muted" />
         <div className="flex gap-2 flex-wrap">
-          {track.modules.map((m) => (
+          {track?.modules.map((m) => (
             <button key={m.id} onClick={() => setModuleId(m.id)}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${moduleId === m.id ? "bg-nuru-purple text-white" : "bg-nuru-lav text-nuru-ink2 hover:bg-nuru-purple/20"}`}>
               W{m.week}: {m.name}
@@ -440,7 +440,7 @@ function LessonsSection({ toast }: { toast: (m: string, e?: boolean) => void }) 
           {lessons.map((l) => (
             <div key={l.id} className="bg-nuru-card rounded-2xl border border-nuru-line p-4 flex items-start gap-4 shadow-card">
               <div className="w-9 h-9 rounded-xl grid place-items-center text-white text-sm font-bold shrink-0 mt-0.5"
-                style={{ background: track.tone }}>D{l.day}</div>
+                style={{ background: track?.tone }}>D{l.day}</div>
               <div className="flex-1 min-w-0">
                 <div className="font-bold text-nuru-ink text-sm">{l.title}</div>
                 <div className="text-xs text-nuru-muted mt-0.5 truncate">{l.objective}</div>
@@ -604,7 +604,7 @@ function QuizzesSection({ toast }: { toast: (m: string, e?: boolean) => void }) 
         </div>
         <ChevronRight size={14} className="text-nuru-muted" />
         <div className="flex gap-2 flex-wrap">
-          {track.modules.map((m) => (
+          {track?.modules.map((m) => (
             <button key={m.id} onClick={() => { setModuleId(m.id); setQuiz(null); }}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold ${moduleId === m.id ? "bg-nuru-purple text-white" : "bg-nuru-lav text-nuru-ink2"}`}>
               W{m.week}
@@ -811,13 +811,13 @@ function ChallengesSection({ toast }: { toast: (m: string, e?: boolean) => void 
       <div className="space-y-3">
         <div className="flex gap-1.5 flex-wrap">
           {TRACKS.map((t) => (
-            <button key={t.id} onClick={() => { setTrackId(t.id); setModuleId(t.modules[0].id); }}
+            <button key={t.id} onClick={() => { setTrackId(t.id); setModuleId(t.modules[0]?.id ?? ""); }}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-bold ${trackId === t.id ? "text-white" : "bg-nuru-lav text-nuru-ink2"}`}
               style={trackId === t.id ? { background: t.tone } : undefined}>{t.subtitle}</button>
           ))}
         </div>
         <div className="flex gap-1.5 flex-wrap">
-          {track.modules.map((m) => (
+          {track?.modules.map((m) => (
             <button key={m.id} onClick={() => setModuleId(m.id)}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold ${moduleId === m.id ? "bg-nuru-purple text-white" : "bg-nuru-lav text-nuru-ink2"}`}>
               W{m.week}
@@ -829,7 +829,7 @@ function ChallengesSection({ toast }: { toast: (m: string, e?: boolean) => void 
             <button key={l.id} onClick={() => loadChallenge(l)}
               className={`w-full text-left px-4 py-3 flex items-center gap-3 border-b border-nuru-line last:border-0 hover:bg-nuru-lav/30 transition-colors ${selected?.id === l.id ? "bg-nuru-lav" : ""}`}>
               <div className="w-7 h-7 rounded-lg grid place-items-center text-[11px] font-bold text-white shrink-0"
-                style={{ background: track.tone }}>D{l.day}</div>
+                style={{ background: track?.tone }}>D{l.day}</div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-semibold text-nuru-ink truncate">{l.title}</div>
                 <div className={`text-[10px] mt-0.5 ${l.has_challenge ? "text-amber-600 font-bold" : "text-nuru-muted"}`}>
