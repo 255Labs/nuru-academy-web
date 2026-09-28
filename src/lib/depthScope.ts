@@ -18,9 +18,11 @@ export function buildDepthScope(trackId: string, progress: number): string {
   const track = TRACKS.find((t) => t.id === trackId);
   if (!track) return "";
 
+  if (track.modules.length === 0) return "";
+  const firstModLen = track.modules[0]?.lessons?.length ?? 0;
   const moduleIdx = Math.min(
     track.modules.length - 1,
-    Math.floor(progress / (track.modules[0].lessons.length + 1))
+    firstModLen > 0 ? Math.floor(progress / (firstModLen + 1)) : 0
   );
 
   const covered = track.modules.slice(0, moduleIdx + 1).map((m) => `Week ${m.week}: ${m.name} — ${m.tagline}`);
