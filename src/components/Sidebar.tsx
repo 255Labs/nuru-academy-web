@@ -4,10 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home, BookOpen, Swords, Trophy, Settings,
-  Award, ChevronRight, Flame, Bot,
+  Award, ChevronRight, Flame,
 } from "lucide-react";
 import { useGameStore } from "@/lib/store";
 import { NuruProCard } from "./NuruProCard";
+import { NuruLogo } from "./NuruLogo";
 import { useT } from "@/lib/i18n";
 
 const NAV = [
@@ -31,27 +32,11 @@ export function Sidebar() {
   const streak = currentStreak();
 
   return (
-    <aside className="w-[252px] shrink-0 h-screen sticky top-0 flex flex-col overflow-hidden"
-      style={{
-        background: "linear-gradient(180deg, #1C1050 0%, #130C3E 40%, #0D0828 100%)",
-        borderRight: "1px solid rgba(124,92,255,0.18)",
-      }}
+    <aside className="w-full h-full flex flex-col overflow-hidden"
     >
       {/* Brand */}
       <div className="px-5 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 shrink-0">
-            <div className="w-10 h-10 rounded-2xl grid place-items-center shadow-pop overflow-hidden"
-              style={{ background: "linear-gradient(135deg, #7C5CFF 0%, #3E2A9E 100%)" }}>
-              <Bot size={22} className="text-white" strokeWidth={1.8} />
-            </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2 border-white/10" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="font-display font-extrabold text-base text-white leading-none tracking-tight">NURU</div>
-            <div className="text-[9px] font-bold tracking-[0.2em] text-white/45 mt-0.5 uppercase">Learning Hub</div>
-          </div>
-        </div>
+        <NuruLogo size={40} />
 
         {/* User mini-card */}
         <div className="mt-3.5 flex items-center gap-2.5 rounded-xl px-3 py-2.5"
