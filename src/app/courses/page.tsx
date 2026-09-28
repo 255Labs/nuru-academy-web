@@ -351,7 +351,11 @@ export default function CoursesPage() {
   const nodes = nodesOf(mod);
   const cur   = Math.min(progress, nodes.length);
 
-  const isTrackPaid = isTrackUnlocked(activeTrack, missionsPassed, purchasedTracks);
+  // Beginner track has no `requires` field so isTrackUnlocked always returns true for it.
+  // We override: beginner is only "paid" if explicitly purchased (first week is free via moduleGated check).
+  const isTrackPaid = activeTrack === "beginner"
+    ? purchasedTracks.includes("beginner")
+    : isTrackUnlocked(activeTrack, missionsPassed, purchasedTracks);
   const moduleGated = isAdvancedModule(activeModuleIdx) && !isTrackPaid;
 
   const curNode   = nodes[Math.min(cur, nodes.length - 1)];
@@ -391,7 +395,7 @@ export default function CoursesPage() {
 
       {/* ── Course picker — stacked cards, each visually self-contained ── */}
       <div className="flex flex-col gap-3 mb-6">
-        {TRACKS.map((t) => {
+        {TRACKS.filter((t) => t.id !== "intermediate" && t.id !== "expert").map((t) => {
           const isActive = t.id === activeTrack;
           const unlocked = isTrackUnlocked(t.id as TrackId, missionsPassed, purchasedTracks);
           const cover    = TRACK_COVER[t.id] ?? TRACK_COVER.beginner;
