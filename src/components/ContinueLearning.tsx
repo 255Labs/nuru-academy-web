@@ -39,8 +39,10 @@ export function ContinueLearning() {
     );
   }
 
-  const unlockedTracks = TRACKS.filter((tr) =>
-    isTrackUnlocked(tr.id as TrackId, missionsPassed, purchasedTracks)
+  const unlockedTracks = TRACKS.filter(
+    (tr) =>
+      tr.id !== "intermediate" &&
+      isTrackUnlocked(tr.id as TrackId, missionsPassed, purchasedTracks)
   );
 
   if (unlockedTracks.length === 0) {
